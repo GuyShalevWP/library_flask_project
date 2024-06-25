@@ -29,7 +29,7 @@ This is a simple Flask-based RESTful API for managing a library system. The API 
 1. Clone the Repository:
 
 ```
-git clone https://github.com/GuyShalevWP/library_flask_sqlalchemy.git
+git clone https://github.com/GuyShalevWP/library_flask_project.git
 cd project
 ```
 
