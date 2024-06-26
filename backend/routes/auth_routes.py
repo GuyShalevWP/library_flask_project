@@ -14,12 +14,13 @@ def register():
     first_name = data.get('first_name')
     last_name = data.get('last_name')
     phone = data.get('phone')
+    is_active = data.get('is_active')
     roles = data.get('roles', ['user'])  # Default role is 'user' if not provided
 
     if User.query.filter_by(email=email).first():
         return jsonify({'message': 'Email already registered'}), 409
 
-    new_user = User(email=email, first_name=first_name, last_name=last_name, phone=phone)
+    new_user = User(email=email, first_name=first_name, last_name=last_name, phone=phone, is_active=is_active)
     new_user.set_password(password)
     db.session.add(new_user)
     
