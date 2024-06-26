@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import create_access_token, create_refresh_token
 from models.auth import User
-from models.roles import Role, UserRole
+from models.roles import Role
 from models import db
 
 auth_bp = Blueprint('auth', __name__)
