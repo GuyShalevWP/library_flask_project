@@ -9,7 +9,7 @@ class User(db.Model):
     last_name = db.Column(db.String(20), nullable=False)
     phone = db.Column(db.String(15), nullable=False)
     is_active = db.Column(db.Boolean, default=True, nullable=False)
-    roles = db.relationship('Role', secondary='user_roles', backref=db.backref('users', lazy='dynamic'))
+    role = db.Column(db.String(50), default='user', nullable=False)  # Add a role column
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)

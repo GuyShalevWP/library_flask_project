@@ -1,7 +1,6 @@
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import create_access_token, create_refresh_token
 from models.auth import User
-from models.roles import Role
 from models import db
 
 auth_bp = Blueprint('auth', __name__)
@@ -14,22 +13,14 @@ def register():
     first_name = data.get('first_name')
     last_name = data.get('last_name')
     phone = data.get('phone')
-    is_active = data.get('is_active')
-    roles = data.get('roles', ['user'])  # Default role is 'user' if not provided
+    role = data.get('role', 'user')  # Default role is 'user' if not provided
 
     if User.query.filter_by(email=email).first():
         return jsonify({'message': 'Email already registered'}), 409
 
-    new_user = User(email=email, first_name=first_name, last_name=last_name, phone=phone, is_active=is_active)
+    new_user = User(email=email, first_name=first_name, last_name=last_name, phone=phone, role=role)
     new_user.set_password(password)
     db.session.add(new_user)
-    
-    for role_name in roles:
-        role = Role.query.filter_by(name=role_name).first()
-        if not role:
-            role = Role(name=role_name)
-            db.session.add(role)
-        new_user.roles.append(role)
     
     db.session.commit()
 

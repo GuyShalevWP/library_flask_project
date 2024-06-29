@@ -1,7 +1,6 @@
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from models.auth import User
-from models.roles import Role
 from models import db
 
 user_bp = Blueprint('user', __name__)
@@ -13,7 +12,7 @@ def get_all_users():
     current_user = db.session.get(User, current_user_id)
 
     # Ensure the current user is an admin
-    if not any(role.name == 'admin' for role in current_user.roles):
+    if current_user.role != 'admin':
         return jsonify({'message': 'Unauthorized to access this resource'}), 403
 
     users = User.query.all()
@@ -25,7 +24,7 @@ def get_all_users():
             'last_name': user.last_name,
             'phone': user.phone,
             'is_active': user.is_active,
-            'roles': [role.name for role in user.roles]
+            'role': user.role
         }
         for user in users
     ]
@@ -38,7 +37,7 @@ def get_user(user_id):
     current_user_id = get_jwt_identity()
     current_user = db.session.get(User, current_user_id)
 
-    if current_user_id != user_id and not any(role.name == 'admin' for role in current_user.roles):
+    if current_user_id != user_id and current_user.role != 'admin':
         return jsonify({'message': 'Unauthorized to access this user'}), 403
 
     user_to_get = db.session.get(User, user_id)
@@ -52,7 +51,7 @@ def get_user(user_id):
         'last_name': user_to_get.last_name,
         'phone': user_to_get.phone,
         'is_active': user_to_get.is_active,
-        'roles': [role.name for role in user_to_get.roles]
+        'role': user_to_get.role
     }
 
     return jsonify(user_data), 200
@@ -124,7 +123,7 @@ def set_user_active(user_id):
     current_user_id = get_jwt_identity()
     current_user = db.session.get(User, current_user_id)
     
-    if current_user_id != user_id and not any(role.name == 'admin' for role in current_user.roles):
+    if current_user_id != user_id and current_user.role != 'admin':
         return jsonify({'message': 'Unauthorized to modify this user'}), 403
 
     user_to_update = db.session.get(User, user_id)
