@@ -21,10 +21,12 @@ def create_app():
         from routes.auth_routes import auth_bp
         from routes.user_routes import user_bp
         from routes.book_routes import book_bp
+        from routes.borrow_routes import borrow_bp
 
         app.register_blueprint(auth_bp)
         app.register_blueprint(user_bp)
         app.register_blueprint(book_bp)
+        app.register_blueprint(borrow_bp)
 
         db.create_all()
 

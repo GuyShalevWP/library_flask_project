@@ -12,8 +12,8 @@ This is a simple Flask-based RESTful API for managing a library system. The API 
 -   Create login endpoint and get token - Done
 -   Update client details - Done
 -   Implement CRUD with rest API for user - Done
--   Implement CRUD with rest API for books - In process
--   Implement CRUD with rest API for borrow - In process
+-   Implement CRUD with rest API for books - Done
+-   Implement CRUD with rest API for borrow - Done
 
 ### Frontend
 
