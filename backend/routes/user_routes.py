@@ -56,6 +56,7 @@ def get_user(user_id):
 
     return jsonify(user_data), 200
 
+
 @user_bp.route('/user/<int:user_id>', methods=['PUT'])
 @jwt_required()
 def update_user(user_id):

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://unpkg.com/axios@1.6.7/dist/axios.min.js"></script>
+</head>
+
+<body>
+    <form id="uploadForm" enctype="multipart/form-data">
+        User name:<input type="text" name="userName" id="userName"><br>
+        Email:<input type="email" name="email" id="email"><br>
+        Your profile image<input type="file" name="file" id="fileInput"><br>
+        <button type="button" onclick="uploadFile()">Upload</button>
+    </form>
+
+<!-- display all images -->
+<div id="imageContainer">
+    <!-- Images will be displayed here -->
+</div>
+    <script>
+        // ************* send start ******************
+        const uploadFile = () => {
+            const userName = document.getElementById('userName').value;
+            const email = document.getElementById('email').value;
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            const formData = new FormData();
+            const SERVER = 'http://127.0.0.1:5000'
+
+            formData.append('userName', userName);
+            formData.append('email', email);
+            formData.append('file', file);
+
+            axios.post(SERVER + '/upload', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            })
+                .then(response => {
+                    console.log('File uploaded successfully:', response);
+                    // Handle the response as needed
+                })
+                .catch(error => {
+                    console.error('Error uploading file:', error);
+                    // Handle errors
+                });
+        }
+   // ************* send end ******************
+
+   // *************Fetch images from Flask endpoint ******************
+        // 
+        fetch('http://127.0.0.1:5000' +'/images')
+            .then(response => response.json())
+            .then(data => {
+                const imageContainer = document.getElementById('imageContainer');
+                data.forEach(image => {
+                    console.log(image);
+                    const imgElement = document.createElement('img');
+                    const userElement = document.createElement('input');
+                    const emailElement = document.createElement('input');
+                    imgElement.src = `http://127.0.0.1:5000/media/${image.filename}`;
+                    imgElement.alt = `${image.userName}'s Image`;
+                    imgElement.style.maxWidth = '100%'; // Optional: Adjust image styling
+                    userElement.value=image.userName
+                    emailElement.value=image.email
+                    imageContainer.appendChild(userElement);
+                    imageContainer.appendChild(emailElement);
+                    imageContainer.appendChild(imgElement);
+                    
+                });
+            })
+            .catch(error => console.error('Error fetching images:', error));
+            // *************Fetch images from Flask endpoint ******************
+    </script>
+</body>
+
+</html>
