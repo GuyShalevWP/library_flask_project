@@ -86,6 +86,47 @@
             <h2 class="text-center">Profile</h2>
             <div id="message" class="mt-3"></div>
             <div id="profileDetails" class="mt-3"></div>
+
+            <div class="row mb-3 mt-3">
+                <div class="col-md-8">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text" for="searchCriteria"
+                                >Search by</label
+                            >
+                        </div>
+                        <select
+                            class="form-control col-md-3"
+                            id="searchCriteria"
+                        >
+                            <option value="all">All</option>
+                            <option value="book_name">Book Name</option>
+                            <option value="author">Author</option>
+                        </select>
+                        <input
+                            type="text"
+                            class="form-control"
+                            id="searchInput"
+                            placeholder="Search"
+                        />
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text" for="returnFilter"
+                                >Filter by</label
+                            >
+                        </div>
+                        <select class="form-control" id="returnFilter">
+                            <option value="">All</option>
+                            <option value="returned">Returned</option>
+                            <option value="not_returned">Not Returned</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
             <div id="borrowedBooks" class="mt-3"></div>
         </div>
 

@@ -18,10 +18,48 @@ document.addEventListener('DOMContentLoaded', () => {
     const fetchBooks = async () => {
         try {
             const response = await axios.get(`${SERVER}/books`);
-            const books = response.data;
-            booksList.innerHTML = books
-                .map(
-                    (book) => `
+            let books = response.data;
+
+            if (role !== 'admin') {
+                books = books.filter((book) => book.is_available);
+            }
+
+            renderBooksTable(books);
+        } catch (error) {
+            console.error('Error fetching books:', error);
+        }
+    };
+
+    const renderBooksTable = (books) => {
+        const searchInput = document
+            .getElementById('searchInput')
+            .value.toLowerCase();
+        const searchCriteria = document.getElementById('searchCriteria').value;
+
+        const filteredBooks = books.filter((book) => {
+            let matchesSearch = true;
+            if (searchInput) {
+                if (searchCriteria === 'all') {
+                    matchesSearch =
+                        book.name.toLowerCase().includes(searchInput) ||
+                        book.author.toLowerCase().includes(searchInput);
+                } else if (searchCriteria === 'book_name') {
+                    matchesSearch = book.name
+                        .toLowerCase()
+                        .includes(searchInput);
+                } else if (searchCriteria === 'author') {
+                    matchesSearch = book.author
+                        .toLowerCase()
+                        .includes(searchInput);
+                }
+            }
+
+            return matchesSearch;
+        });
+
+        booksList.innerHTML = filteredBooks
+            .map(
+                (book) => `
             <div class="card mt-3">
                 <div class="row no-gutters">
                     <div class="col-md-8">
@@ -31,8 +69,8 @@ document.addEventListener('DOMContentLoaded', () => {
                             <p class="card-text">Release Date: ${
                                 book.release_date
                             }</p>
-                            <p class="card-text">Available: ${
-                                book.is_available ? 'Available' : 'Unavailable'
+                            <p class="card-text">Status: ${
+                                book.is_borrowed ? 'Unavailable' : 'Available'
                             }</p>
                             ${
                                 role === 'admin'
@@ -56,19 +94,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                     <div class="col-md-4">
                         <img src="${SERVER}/assets/images/${
-                        book.img
-                    }" class="card-img" alt="${
-                        book.name
-                    }" style="max-width: 100%; height: auto;">
+                    book.img
+                }" class="card-img" alt="${
+                    book.name
+                }" style="max-width: 100%; height: auto;">
                     </div>
                 </div>
             </div>
         `
-                )
-                .join('');
-        } catch (error) {
-            console.error('Error fetching books:', error);
-        }
+            )
+            .join('');
     };
 
     // Show edit modal
@@ -194,6 +229,13 @@ document.addEventListener('DOMContentLoaded', () => {
             message.innerHTML = `<div class="alert alert-danger">${errorMessage}</div>`;
         }
     };
+
+    document
+        .getElementById('searchInput')
+        .addEventListener('input', fetchBooks);
+    document
+        .getElementById('searchCriteria')
+        .addEventListener('change', fetchBooks);
 
     // Initialize page
     const initializePage = () => {

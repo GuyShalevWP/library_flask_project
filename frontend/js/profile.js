@@ -53,6 +53,38 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const renderBorrowedBooks = (borrowedBooks) => {
+        const searchInput = document
+            .getElementById('searchInput')
+            .value.toLowerCase();
+        const searchCriteria = document.getElementById('searchCriteria').value;
+        const returnFilter = document.getElementById('returnFilter').value;
+
+        const filteredBooks = borrowedBooks.filter((book) => {
+            let matchesSearch = true;
+            if (searchInput) {
+                if (searchCriteria === 'all') {
+                    matchesSearch =
+                        book.book_name.toLowerCase().includes(searchInput) ||
+                        book.author.toLowerCase().includes(searchInput);
+                } else if (searchCriteria === 'book_name') {
+                    matchesSearch = book.book_name
+                        .toLowerCase()
+                        .includes(searchInput);
+                } else if (searchCriteria === 'author') {
+                    matchesSearch = book.author
+                        .toLowerCase()
+                        .includes(searchInput);
+                }
+            }
+
+            const matchesFilter =
+                returnFilter === '' ||
+                (returnFilter === 'returned' && book.return_type === 0) ||
+                (returnFilter === 'not_returned' && book.return_type !== 0);
+
+            return matchesSearch && matchesFilter;
+        });
+
         const table = `
             <h3>Borrowed Books</h3>
             <table class="table table-bordered">
@@ -67,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </tr>
                 </thead>
                 <tbody>
-                    ${borrowedBooks
+                    ${filteredBooks
                         .map(
                             (book, index) => `
                             <tr>
@@ -132,6 +164,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         });
+
+    document
+        .getElementById('searchInput')
+        .addEventListener('input', fetchBorrowedBooks);
+    document
+        .getElementById('searchCriteria')
+        .addEventListener('change', fetchBorrowedBooks);
+    document
+        .getElementById('returnFilter')
+        .addEventListener('change', fetchBorrowedBooks);
 
     fetchProfile();
 });

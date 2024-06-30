@@ -22,38 +22,42 @@ document.addEventListener('DOMContentLoaded', () => {
         const searchCriteria = document.getElementById('searchCriteria').value;
         const returnFilter = document.getElementById('returnFilter').value;
 
-        const filteredBooks = borrowedBooks.filter((book) => {
-            let matchesSearch = true;
-            if (searchInput) {
-                if (searchCriteria === 'all') {
-                    matchesSearch =
-                        book.user_email.toLowerCase().includes(searchInput) ||
-                        `${book.first_name} ${book.last_name}`
+        const filteredBooks = borrowedBooks
+            .filter((book) => {
+                let matchesSearch = true;
+                if (searchInput) {
+                    if (searchCriteria === 'all') {
+                        matchesSearch =
+                            book.user_email
+                                .toLowerCase()
+                                .includes(searchInput) ||
+                            `${book.first_name} ${book.last_name}`
+                                .toLowerCase()
+                                .includes(searchInput) ||
+                            book.book_name.toLowerCase().includes(searchInput);
+                    } else if (searchCriteria === 'email') {
+                        matchesSearch = book.user_email
                             .toLowerCase()
-                            .includes(searchInput) ||
-                        book.book_name.toLowerCase().includes(searchInput);
-                } else if (searchCriteria === 'email') {
-                    matchesSearch = book.user_email
-                        .toLowerCase()
-                        .includes(searchInput);
-                } else if (searchCriteria === 'name') {
-                    matchesSearch = `${book.first_name} ${book.last_name}`
-                        .toLowerCase()
-                        .includes(searchInput);
-                } else if (searchCriteria === 'book_name') {
-                    matchesSearch = book.book_name
-                        .toLowerCase()
-                        .includes(searchInput);
+                            .includes(searchInput);
+                    } else if (searchCriteria === 'name') {
+                        matchesSearch = `${book.first_name} ${book.last_name}`
+                            .toLowerCase()
+                            .includes(searchInput);
+                    } else if (searchCriteria === 'book_name') {
+                        matchesSearch = book.book_name
+                            .toLowerCase()
+                            .includes(searchInput);
+                    }
                 }
-            }
 
-            const matchesFilter =
-                returnFilter === '' ||
-                (returnFilter === 'returned' && book.return_type === 0) ||
-                (returnFilter === 'not_returned' && book.return_type !== 0);
+                const matchesFilter =
+                    returnFilter === '' ||
+                    (returnFilter === 'returned' && book.return_type === 0) ||
+                    (returnFilter === 'not_returned' && book.return_type !== 0);
 
-            return matchesSearch && matchesFilter;
-        });
+                return matchesSearch && matchesFilter;
+            })
+            .reverse(); // Reversing the filtered array to show most recent first
 
         const table = `
             <table class="table table-bordered">
