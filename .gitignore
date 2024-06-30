@@ -1,3 +1,4 @@
 # Ignore pycaches
 __pycache__
 images
+instance/

@@ -102,6 +102,27 @@ def get_or_update_user(user_id):
 
         return jsonify({'message': 'User information updated successfully', 'updated_email': updated_user.email}), 200
 
+@user_bp.route('/user/change_password', methods=['PUT'])
+@jwt_required()
+def change_password():
+    current_user_id = get_jwt_identity()
+    current_user = db.session.get(User, current_user_id)
+
+    if not current_user:
+        return jsonify({'message': 'User not found'}), 404
+
+    data = request.get_json()
+    old_password = data.get('old_password')
+    new_password = data.get('new_password')
+
+    if not current_user.check_password(old_password):
+        return jsonify({'message': 'Old password is incorrect'}), 403
+
+    current_user.set_password(new_password)
+    db.session.commit()
+
+    return jsonify({'message': 'Password changed successfully'}), 200
+
 
 @user_bp.route('/user/<int:user_id>/details', methods=['GET', 'PUT'])
 @jwt_required()

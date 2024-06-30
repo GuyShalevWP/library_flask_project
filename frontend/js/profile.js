@@ -46,10 +46,34 @@ document.addEventListener('DOMContentLoaded', () => {
                     <p class="card-text"><strong>First Name:</strong> ${profile.first_name}</p>
                     <p class="card-text"><strong>Last Name:</strong> ${profile.last_name}</p>
                     <p class="card-text"><strong>Phone:</strong> ${profile.phone}</p>
+                    <button class="btn btn-primary" id="changePasswordButton">
+                        Change Password
+                    </button>
+                    <button class="btn btn-secondary" id="editProfileButton">
+                        Edit Profile
+                    </button>
                 </div>
             </div>
         `;
         document.getElementById('profileDetails').innerHTML = profileDetails;
+
+        document
+            .getElementById('changePasswordButton')
+            .addEventListener('click', () => {
+                $('#changePasswordModal').modal('show');
+            });
+
+        document
+            .getElementById('editProfileButton')
+            .addEventListener('click', () => {
+                $('#updateProfileModal').modal('show');
+                document.getElementById('updateEmail').value = profile.email;
+                document.getElementById('updateFirstName').value =
+                    profile.first_name;
+                document.getElementById('updateLastName').value =
+                    profile.last_name;
+                document.getElementById('updatePhone').value = profile.phone;
+            });
     };
 
     const renderBorrowedBooks = (borrowedBooks) => {
@@ -138,32 +162,112 @@ document.addEventListener('DOMContentLoaded', () => {
         $('#confirmReturnModal').modal('show');
     };
 
+    const confirmReturnBook = async () => {
+        if (currentBorrowId) {
+            try {
+                const response = await axios.put(
+                    `${SERVER}/return_book/${currentBorrowId}`,
+                    {},
+                    {
+                        headers: { Authorization: `Bearer ${token}` },
+                    }
+                );
+
+                if (response.status === 200) {
+                    $('#confirmReturnModal').modal('hide');
+                    alert('Book returned successfully');
+                    fetchBorrowedBooks(); // Refresh the table after returning the book
+                } else {
+                    alert('Failed to return book');
+                }
+            } catch (error) {
+                console.error('Error returning book:', error);
+                alert('Error returning book');
+            }
+        }
+    };
+
+    const changePassword = async (event) => {
+        event.preventDefault();
+        const oldPassword = document.getElementById('oldPassword').value;
+        const newPassword = document.getElementById('newPassword').value;
+        const confirmNewPassword =
+            document.getElementById('confirmNewPassword').value;
+
+        if (newPassword !== confirmNewPassword) {
+            alert('New passwords do not match');
+            return;
+        }
+
+        try {
+            const response = await axios.put(
+                `${SERVER}/user/change_password`,
+                {
+                    old_password: oldPassword,
+                    new_password: newPassword,
+                },
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                }
+            );
+
+            if (response.status === 200) {
+                $('#changePasswordModal').modal('hide');
+                alert('Password changed successfully');
+            } else {
+                alert('Failed to change password');
+            }
+        } catch (error) {
+            console.error('Error changing password:', error);
+            alert('Error changing password');
+        }
+    };
+
+    const updateProfile = async (event) => {
+        event.preventDefault();
+        const email = document.getElementById('updateEmail').value;
+        const firstName = document.getElementById('updateFirstName').value;
+        const lastName = document.getElementById('updateLastName').value;
+        const phone = document.getElementById('updatePhone').value;
+
+        try {
+            const response = await axios.put(
+                `${SERVER}/user/profile`, // Endpoint to update profile
+                {
+                    email,
+                    first_name: firstName,
+                    last_name: lastName,
+                    phone,
+                },
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                }
+            );
+
+            if (response.status === 200) {
+                $('#updateProfileModal').modal('hide');
+                alert('Profile updated successfully');
+                fetchProfile(); // Refresh the profile details
+            } else {
+                alert('Failed to update profile');
+            }
+        } catch (error) {
+            console.error('Error updating profile:', error);
+            alert('Error updating profile');
+        }
+    };
+
+    document
+        .getElementById('changePasswordForm')
+        .addEventListener('submit', changePassword);
+
+    document
+        .getElementById('updateProfileForm')
+        .addEventListener('submit', updateProfile);
+
     document
         .getElementById('confirmReturnButton')
-        .addEventListener('click', async () => {
-            if (currentBorrowId) {
-                try {
-                    const response = await axios.put(
-                        `${SERVER}/return_book/${currentBorrowId}`,
-                        {},
-                        {
-                            headers: { Authorization: `Bearer ${token}` },
-                        }
-                    );
-
-                    if (response.status === 200) {
-                        $('#confirmReturnModal').modal('hide');
-                        alert('Book returned successfully');
-                        fetchBorrowedBooks(); // Refresh the table after returning the book
-                    } else {
-                        alert('Failed to return book');
-                    }
-                } catch (error) {
-                    console.error('Error returning book:', error);
-                    alert('Error returning book');
-                }
-            }
-        });
+        .addEventListener('click', confirmReturnBook);
 
     document
         .getElementById('searchInput')

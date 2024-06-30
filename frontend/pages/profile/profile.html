@@ -175,5 +175,164 @@
                 </div>
             </div>
         </div>
+
+        <!-- Change Password Modal -->
+        <div
+            class="modal fade"
+            id="changePasswordModal"
+            tabindex="-1"
+            aria-labelledby="changePasswordModalLabel"
+            aria-hidden="true"
+        >
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="changePasswordModalLabel">
+                            Change Password
+                        </h5>
+                        <button
+                            type="button"
+                            class="close"
+                            data-dismiss="modal"
+                            aria-label="Close"
+                        >
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="changePasswordForm">
+                            <div class="form-group">
+                                <div class="form-group">
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        id="hiddenUsername"
+                                        name="hiddenUsername"
+                                        autocomplete="username"
+                                        value="your-username-value"
+                                        style="display: none"
+                                    />
+                                </div>
+                                <label for="oldPassword">Old Password</label>
+                                <input
+                                    type="password"
+                                    class="form-control"
+                                    id="oldPassword"
+                                    required
+                                    autocomplete="current-password"
+                                />
+                            </div>
+                            <div class="form-group">
+                                <label for="newPassword">New Password</label>
+                                <input
+                                    type="password"
+                                    class="form-control"
+                                    id="newPassword"
+                                    required
+                                    autocomplete="new-password"
+                                />
+                            </div>
+                            <div class="form-group">
+                                <label for="confirmNewPassword"
+                                    >Confirm New Password</label
+                                >
+                                <input
+                                    type="password"
+                                    class="form-control"
+                                    id="confirmNewPassword"
+                                    required
+                                    autocomplete="new-password"
+                                />
+                            </div>
+                            <button
+                                type="submit"
+                                class="btn btn-primary"
+                                id="confirmPasswordChangeButton"
+                            >
+                                Change Password
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Update Profile Modal -->
+        <div
+            class="modal fade"
+            id="updateProfileModal"
+            tabindex="-1"
+            aria-labelledby="updateProfileModalLabel"
+            aria-hidden="true"
+        >
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="updateProfileModalLabel">
+                            Update Profile
+                        </h5>
+                        <button
+                            type="button"
+                            class="close"
+                            data-dismiss="modal"
+                            aria-label="Close"
+                        >
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="updateProfileForm">
+                            <div class="form-group">
+                                <label for="updateEmail">Email</label>
+                                <input
+                                    type="email"
+                                    class="form-control"
+                                    id="updateEmail"
+                                    required
+                                    autocomplete="email"
+                                />
+                            </div>
+                            <div class="form-group">
+                                <label for="updateFirstName">First Name</label>
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    id="updateFirstName"
+                                    required
+                                    autocomplete="given-name"
+                                />
+                            </div>
+                            <div class="form-group">
+                                <label for="updateLastName">Last Name</label>
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    id="updateLastName"
+                                    required
+                                    autocomplete="family-name"
+                                />
+                            </div>
+                            <div class="form-group">
+                                <label for="updatePhone">Phone</label>
+                                <input
+                                    type="tel"
+                                    class="form-control"
+                                    id="updatePhone"
+                                    required
+                                    autocomplete="tel"
+                                />
+                            </div>
+                            <button
+                                type="submit"
+                                class="btn btn-primary"
+                                id="confirmUpdateProfileButton"
+                            >
+                                Update Profile
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
     </body>
 </html>
