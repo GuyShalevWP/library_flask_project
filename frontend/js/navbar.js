@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const SERVER = 'http://localhost:7000';
     const token = localStorage.getItem('token');
     const user = sessionStorage.getItem('user')
         ? JSON.parse(sessionStorage.getItem('user'))
@@ -13,15 +12,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const updateNavbar = () => {
         if (token) {
             authLinks.innerHTML = `
-                <li class="nav-item">
-                    <a class="nav-link" href="#" id="logout">Logout</a>
-                </li>
-            `;
+            <li class="nav-item">
+                <a class="nav-link" href="#" id="logout">Logout</a>
+            </li>
+        `;
 
             document.getElementById('logout').addEventListener('click', () => {
                 localStorage.removeItem('token');
                 sessionStorage.removeItem('user');
-                window.location.href = 'index.html';
+                // Redirect to home page
+                const currentPath = window.location.pathname;
+                if (currentPath.endsWith('index.html') || currentPath === '/') {
+                    window.location.href = 'index.html';
+                } else {
+                    window.location.href = '../../index.html';
+                }
             });
 
             if (role === 'admin' && customersLink) {

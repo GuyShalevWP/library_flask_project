@@ -5,7 +5,6 @@ document.addEventListener('DOMContentLoaded', () => {
         ? JSON.parse(sessionStorage.getItem('user')).role
         : null;
 
-    const authLinks = document.getElementById('authLinks');
     const message = document.getElementById('message');
     const booksList = document.getElementById('booksList');
     const addBookForm = document.getElementById('addBookForm');
@@ -196,35 +195,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Check if the user is authenticated and update the navbar
-    const updateNavbar = () => {
-        if (token) {
-            authLinks.innerHTML = `
-                <li class="nav-item">
-                    <a class="nav-link" href="#" id="logout">Logout</a>
-                </li>
-            `;
-
-            document.getElementById('logout').addEventListener('click', () => {
-                localStorage.removeItem('token');
-                sessionStorage.removeItem('user');
-                window.location.href = '../../index.html';
-            });
-        }
-    };
-
     // Initialize page
     const initializePage = () => {
         if (role === 'admin' && addBookSection) {
             addBookSection.style.display = 'block';
         }
-
-        document.querySelectorAll('.nav-item a.nav-link').forEach((item) => {
-            if (item.href === window.location.href) {
-                item.classList.add('active');
-                item.innerHTML += ' <span class="sr-only">(current)</span>';
-            }
-        });
 
         if (addBookForm) {
             addBookForm.addEventListener('submit', addBook);
@@ -242,7 +217,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         fetchBooks();
-        updateNavbar();
     };
 
     initializePage();
