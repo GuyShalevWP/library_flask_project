@@ -90,13 +90,17 @@ def update_user(user_id):
 
     return jsonify({'message': 'User information updated successfully', 'updated_email': updated_user.email}), 200
 
-@user_bp.route('/user/<int:user_id>/details', methods=['PUT'])
+@user_bp.route('/user/<int:user_id>/details', methods=['GET', 'PUT'])
 @jwt_required()
 def update_user_details(user_id):
     current_user_id = get_jwt_identity()
     current_user = db.session.get(User, current_user_id)
-    
-    if current_user_id != user_id:
+
+    if not current_user:
+        return jsonify({'message': 'User not found'}), 404
+
+    # Allow user to edit their own details or admin to edit any user
+    if current_user_id != user_id and current_user.role != 'admin':
         return jsonify({'message': 'Unauthorized to modify this user'}), 403
 
     user_to_update = db.session.get(User, user_id)
@@ -117,6 +121,7 @@ def update_user_details(user_id):
 
     db.session.commit()
     return jsonify({'message': 'User details updated successfully'}), 200
+
 
 @user_bp.route('/user/<int:user_id>/set_active', methods=['PUT'])
 @jwt_required()
@@ -141,3 +146,4 @@ def set_user_active(user_id):
         return jsonify({'message': f"User's active status set to {status}"}), 200
 
     return jsonify({'message': 'Invalid or missing \'is_active\' boolean value'}), 400
+
