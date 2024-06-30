@@ -14,6 +14,7 @@
         <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
         <script src="js/navbar.js" defer></script>
     </head>
+
     <body>
         <nav class="navbar navbar-expand-lg navbar-light bg-light">
             <a class="navbar-brand" href="index.html">Library</a>
@@ -30,10 +31,8 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav mr-auto">
-                    <li class="nav-item active">
-                        <a class="nav-link" href="index.html"
-                            >Home <span class="sr-only">(current)</span></a
-                        >
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">Home</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="pages/books/books.html"
@@ -41,7 +40,20 @@
                         >
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Borrow a Book</a>
+                        <a class="nav-link" href="pages/borrows/borrows.html"
+                            >Borrow a Book</a
+                        >
+                    </li>
+                    <li
+                        class="nav-item"
+                        id="borrowedBooksLink"
+                        style="display: none"
+                    >
+                        <a
+                            class="nav-link"
+                            href="pages/borrowed_books/borrowed_books.html"
+                            >Borrowed Books</a
+                        >
                     </li>
                     <li
                         class="nav-item"

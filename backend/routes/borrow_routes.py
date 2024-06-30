@@ -4,9 +4,20 @@ from models.borrow import BorrowedBook
 from models.books import Books
 from models.auth import User
 from models import db
-from datetime import datetime
+from datetime import datetime, timedelta
 
 borrow_bp = Blueprint('borrow', __name__)
+
+def calculate_return_date(borrow_date_str, return_type):
+    borrow_date = datetime.strptime(borrow_date_str, '%d-%m-%Y')
+    if return_type == 1:
+        return borrow_date + timedelta(days=10)
+    elif return_type == 2:
+        return borrow_date + timedelta(days=5)
+    elif return_type == 3:
+        return borrow_date + timedelta(days=2)
+    else:
+        raise ValueError('Invalid return type')
 
 @borrow_bp.route('/borrow_book', methods=['POST'])
 @jwt_required()
@@ -32,18 +43,26 @@ def borrow_book():
     if book.is_borrowed:
         return jsonify({'message': 'Book is already borrowed'}), 409
 
+    return_date = calculate_return_date(borrow_date, return_type).strftime('%d-%m-%Y')
+
     borrowed_book = BorrowedBook(
         user_id=current_user_id,
         book_id=book_id,
         borrow_date=borrow_date,
-        return_type=return_type
+        return_type=return_type,
+        return_date=return_date
     )
 
     book.is_borrowed = True
     db.session.add(borrowed_book)
     db.session.commit()
 
-    return jsonify({'message': 'Book borrowed successfully'}), 201
+    return jsonify({
+        'message': 'Book borrowed successfully',
+        'book': {'name': book.name, 'author': book.author},
+        'borrow_date': borrow_date,
+        'return_date': return_date
+    }), 201
 
 @borrow_bp.route('/borrowed_books', methods=['GET'])
 @jwt_required()
@@ -58,12 +77,14 @@ def get_all_borrowed_books():
     borrowed_books_data = [
         {
             'id': borrowed_book.id,
-            'user_id': borrowed_book.user_id,
-            'book_id': borrowed_book.book_id,
-            'borrow_date': borrowed_book.borrow_date,
-            'return_type': borrowed_book.return_type,
             'user_email': borrowed_book.user.email,
-            'book_name': borrowed_book.book.name
+            'first_name': borrowed_book.user.first_name,
+            'last_name': borrowed_book.user.last_name,
+            'book_name': borrowed_book.book.name,
+            'is_borrowed': borrowed_book.book.is_borrowed,
+            'return_type': borrowed_book.return_type,
+            'borrow_date': borrowed_book.borrow_date,
+            'return_date': borrowed_book.return_date if borrowed_book.return_type == 0 else calculate_return_date(borrowed_book.borrow_date, borrowed_book.return_type).strftime('%d-%m-%Y'),
         }
         for borrowed_book in borrowed_books
     ]
@@ -86,7 +107,7 @@ def get_user_borrowed_books():
     ]
     return jsonify(borrowed_books_data), 200
 
-@borrow_bp.route('/return_book/<int:borrow_id>', methods=['PUT'])
+@borrow_bp.route('/return_book/<int:borrow_id>', methods=['GET', 'PUT'])
 @jwt_required()
 def return_book(borrow_id):
     current_user_id = get_jwt_identity()

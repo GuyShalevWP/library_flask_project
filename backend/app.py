@@ -4,6 +4,7 @@ from flask_cors import CORS
 from flask_migrate import Migrate
 from config.config import Config
 from models import db  # Import the single instance of db
+from config.default_user import create_default_admin
 
 jwt = JWTManager()
 migrate = Migrate()
@@ -29,6 +30,7 @@ def create_app():
         app.register_blueprint(borrow_bp)
 
         db.create_all()
+        create_default_admin()
 
     return app
 

@@ -1,3 +1,4 @@
+// js/navbar.js
 document.addEventListener('DOMContentLoaded', () => {
     const token = localStorage.getItem('token');
     const user = sessionStorage.getItem('user')
@@ -7,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const authLinks = document.getElementById('authLinks');
     const customersLink = document.getElementById('customersLink');
+    const borrowedBooksLink = document.getElementById('borrowedBooksLink');
 
     // Check if the user is authenticated and update the navbar
     const updateNavbar = () => {
@@ -29,8 +31,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
 
-            if (role === 'admin' && customersLink) {
+            if (
+                (role === 'admin' && customersLink) ||
+                (role === 'admin' && borrowedBooksLink)
+            ) {
                 customersLink.style.display = 'block';
+                borrowedBooksLink.style.display = 'block';
             }
         }
     };
