@@ -13,17 +13,26 @@ document.addEventListener('DOMContentLoaded', () => {
     // Check if the user is authenticated and update the navbar
     const updateNavbar = () => {
         if (token) {
+            const currentPath = window.location.pathname;
+            let profileHref = 'pages/profile/profile.html';
+            if (currentPath.includes('/pages/')) {
+                profileHref = '../profile/profile.html';
+            }
+
             authLinks.innerHTML = `
+            <li class="nav-item">
+                <a class="nav-link" href="${profileHref}" id="profile">Profile</a>
+            </li>
             <li class="nav-item">
                 <a class="nav-link" href="#" id="logout">Logout</a>
             </li>
-        `;
+        
+    `;
 
             document.getElementById('logout').addEventListener('click', () => {
                 localStorage.removeItem('token');
                 sessionStorage.removeItem('user');
                 // Redirect to home page
-                const currentPath = window.location.pathname;
                 if (currentPath.endsWith('index.html') || currentPath === '/') {
                     window.location.href = 'index.html';
                 } else {

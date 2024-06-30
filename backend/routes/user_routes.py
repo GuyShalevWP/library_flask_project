@@ -31,64 +31,77 @@ def get_all_users():
 
     return jsonify(users_data), 200
 
-@user_bp.route('/user/<int:user_id>', methods=['GET'])
+# In your user_routes.py
+@user_bp.route('/profile', methods=['GET'])
 @jwt_required()
-def get_user(user_id):
+def get_profile():
     current_user_id = get_jwt_identity()
     current_user = db.session.get(User, current_user_id)
 
-    if current_user_id != user_id and current_user.role != 'admin':
-        return jsonify({'message': 'Unauthorized to access this user'}), 403
-
-    user_to_get = db.session.get(User, user_id)
-    if not user_to_get:
+    if not current_user:
         return jsonify({'message': 'User not found'}), 404
 
     user_data = {
-        'id': user_to_get.id,
-        'email': user_to_get.email,
-        'first_name': user_to_get.first_name,
-        'last_name': user_to_get.last_name,
-        'phone': user_to_get.phone,
-        'is_active': user_to_get.is_active,
-        'role': user_to_get.role
+        'id': current_user.id,
+        'email': current_user.email,
+        'first_name': current_user.first_name,
+        'last_name': current_user.last_name,
+        'phone': current_user.phone,
+        'is_active': current_user.is_active,
+        'role': current_user.role
     }
 
     return jsonify(user_data), 200
 
 
-@user_bp.route('/user/<int:user_id>', methods=['PUT'])
-@jwt_required()
-def update_user(user_id):
-    current_user_id = get_jwt_identity()
-    
-    # Ensure that only the user who owns the account can update their email or password
-    if current_user_id != user_id:
-        return jsonify({'message': 'Unauthorized to modify this user'}), 403
 
-    user_to_update = db.session.get(User, user_id)
-    if not user_to_update:
+@user_bp.route('/user/<int:user_id>', methods=['GET', 'PUT'])
+@jwt_required()
+def get_or_update_user(user_id):
+    current_user_id = get_jwt_identity()
+    current_user = db.session.get(User, current_user_id)
+    
+    # Ensure that the user can access or modify their own account or an admin can access any account
+    if current_user_id != user_id and current_user.role != 'admin':
+        return jsonify({'message': 'Unauthorized to access or modify this user'}), 403
+
+    user_to_modify = db.session.get(User, user_id)
+    if not user_to_modify:
         return jsonify({'message': 'User not found'}), 404
 
-    data = request.get_json()
-    new_email = data.get('email')
-    new_password = data.get('password')
+    if request.method == 'GET':
+        user_data = {
+            'id': user_to_modify.id,
+            'email': user_to_modify.email,
+            'first_name': user_to_modify.first_name,
+            'last_name': user_to_modify.last_name,
+            'phone': user_to_modify.phone,
+            'is_active': user_to_modify.is_active,
+            'role': user_to_modify.role
+        }
+        return jsonify(user_data), 200
+    
+    if request.method == 'PUT':
+        data = request.get_json()
+        new_email = data.get('email')
+        new_password = data.get('password')
 
-    if new_email:
-        existing_user = User.query.filter_by(email=new_email).first()
-        if existing_user and existing_user.id != user_id:
-            return jsonify({'message': 'Email already registered'}), 409
-        user_to_update.email = new_email
+        if new_email:
+            existing_user = User.query.filter_by(email=new_email).first()
+            if existing_user and existing_user.id != user_id:
+                return jsonify({'message': 'Email already registered'}), 409
+            user_to_modify.email = new_email
 
-    if new_password:
-        user_to_update.set_password(new_password)
+        if new_password:
+            user_to_modify.set_password(new_password)
 
-    db.session.commit()
+        db.session.commit()
 
-    # Re-fetch the user to confirm the email update
-    updated_user = db.session.get(User, user_id)
+        # Re-fetch the user to confirm the email update
+        updated_user = db.session.get(User, user_id)
 
-    return jsonify({'message': 'User information updated successfully', 'updated_email': updated_user.email}), 200
+        return jsonify({'message': 'User information updated successfully', 'updated_email': updated_user.email}), 200
+
 
 @user_bp.route('/user/<int:user_id>/details', methods=['GET', 'PUT'])
 @jwt_required()

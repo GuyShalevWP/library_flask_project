@@ -101,11 +101,14 @@ def get_user_borrowed_books():
             'book_id': borrowed_book.book_id,
             'borrow_date': borrowed_book.borrow_date,
             'return_type': borrowed_book.return_type,
-            'book_name': borrowed_book.book.name
+            'book_name': borrowed_book.book.name,
+            'author': borrowed_book.book.author,
+            'return_date': borrowed_book.return_date if borrowed_book.return_type == 0 else calculate_return_date(borrowed_book.borrow_date, borrowed_book.return_type).strftime('%d-%m-%Y')
         }
         for borrowed_book in borrowed_books
     ]
     return jsonify(borrowed_books_data), 200
+
 
 @borrow_bp.route('/return_book/<int:borrow_id>', methods=['GET', 'PUT'])
 @jwt_required()
