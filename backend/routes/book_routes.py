@@ -29,7 +29,7 @@ def add_book():
     if not name or not author or not release_date or not img_file:
         return jsonify({'message': 'Missing required fields'}), 400
 
-    #TODO: check book name and author
+    #TODO: check if book name and author exists
     
     if Books.query.filter_by(name=name).first():
         return jsonify({'message': 'Book already exists'}), 409
