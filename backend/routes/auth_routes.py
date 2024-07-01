@@ -3,7 +3,7 @@ from flask_jwt_extended import create_access_token, create_refresh_token
 from models.auth import User
 from models import db
 
-auth_bp = Blueprint('auth', __name__)
+auth_bp = Blueprint('auth', __name__ ) #url_prefix='/auth'
 
 #TODO: add errors in case the password too short, or missing special char
 #TODO: add errors in case the email don't contain @ and .

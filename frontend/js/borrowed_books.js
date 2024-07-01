@@ -3,6 +3,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const token = localStorage.getItem('token');
     let currentBorrowId = null;
 
+    const user = sessionStorage.getItem('user');
+    const role = user ? user.role : null;
+
+    // Check if the token exists, if not redirect to sign-in
+    if (!token && role !== 'admin') {
+        window.location.href = '../signin_register/signin.html';
+        return;
+    }
+
     const fetchBorrowedBooks = async () => {
         try {
             const response = await axios.get(`${SERVER}/borrowed_books`, {

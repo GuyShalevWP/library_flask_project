@@ -1,6 +1,14 @@
 document.addEventListener('DOMContentLoaded', () => {
     const SERVER = 'http://localhost:7000';
     const token = localStorage.getItem('token');
+    const user = sessionStorage.getItem('user');
+    const role = user ? user.role : null;
+
+    // Check if the token exists, if not redirect to sign-in
+    if (!token && role !== 'admin') {
+        window.location.href = '../signin_register/signin.html';
+        return;
+    }
 
     const searchCriteria = document.getElementById('searchCriteria');
     const searchInput = document.getElementById('searchInput');
