@@ -5,6 +5,11 @@ from models import db
 
 auth_bp = Blueprint('auth', __name__)
 
+#TODO: add errors in case the password too short, or missing special char
+#TODO: add errors in case the email don't contain @ and .
+#TODO: before commit change first latter of first name and last name to be capitalized
+
+# Register
 @auth_bp.route('/register', methods=['POST'])
 def register():
     data = request.get_json()
@@ -26,6 +31,7 @@ def register():
 
     return jsonify({'message': 'User registered successfully'}), 201
 
+# Login
 @auth_bp.route('/login', methods=['POST'])
 def login():
     data = request.get_json()

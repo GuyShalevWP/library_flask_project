@@ -8,6 +8,9 @@ from models import db
 
 book_bp = Blueprint('books', __name__)
 
+#TODO: before commit change first latter of name and author to be capitalized
+
+# Add book
 @book_bp.route('/add_book', methods=['POST'])
 @jwt_required()
 def add_book():
@@ -26,6 +29,8 @@ def add_book():
     if not name or not author or not release_date or not img_file:
         return jsonify({'message': 'Missing required fields'}), 400
 
+    #TODO: check book name and author
+    
     if Books.query.filter_by(name=name).first():
         return jsonify({'message': 'Book already exists'}), 409
 
@@ -46,6 +51,7 @@ def add_book():
 
     return jsonify({'message': 'Book added successfully'}), 201
 
+# Get all books (with or without user)
 @book_bp.route('/books', methods=['GET'])
 def get_books():
     books = Books.query.all()
@@ -63,10 +69,12 @@ def get_books():
     ]
     return jsonify(books_data), 200
 
+# Pathing uploaded image
 @book_bp.route('/assets/images/<path:filename>')
 def serve_images(filename):
     return send_from_directory(current_app.config['UPLOAD_FOLDER'], filename)
 
+# Update book (name, author, release date, image)
 @book_bp.route('/update_book/<int:book_id>', methods=['GET', 'PUT'])
 @jwt_required()
 def update_book(book_id):
@@ -95,7 +103,7 @@ def update_book(book_id):
     db.session.commit()
     return jsonify({'message': 'Book updated successfully'}), 200
 
-
+# Inable disable a book (change is_available)
 @book_bp.route('/delete_book/<int:book_id>', methods=['PUT'])
 @jwt_required()
 def delete_book(book_id):

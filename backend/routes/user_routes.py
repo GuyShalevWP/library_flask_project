@@ -5,6 +5,7 @@ from models import db
 
 user_bp = Blueprint('user', __name__)
 
+# Endpoint get all users (only admin can see)
 @user_bp.route('/users', methods=['GET'])
 @jwt_required()
 def get_all_users():
@@ -31,7 +32,7 @@ def get_all_users():
 
     return jsonify(users_data), 200
 
-# In your user_routes.py
+# Endpoint get user info
 @user_bp.route('/profile', methods=['GET'])
 @jwt_required()
 def get_profile():
@@ -54,7 +55,7 @@ def get_profile():
     return jsonify(user_data), 200
 
 
-
+# Endpoint get user details and edit it
 @user_bp.route('/user/<int:user_id>', methods=['GET', 'PUT'])
 @jwt_required()
 def get_or_update_user(user_id):
@@ -102,6 +103,7 @@ def get_or_update_user(user_id):
 
         return jsonify({'message': 'User information updated successfully', 'updated_email': updated_user.email}), 200
 
+# Endpoint change password
 @user_bp.route('/user/change_password', methods=['PUT'])
 @jwt_required()
 def change_password():
@@ -123,7 +125,7 @@ def change_password():
 
     return jsonify({'message': 'Password changed successfully'}), 200
 
-
+# Endpoint update details
 @user_bp.route('/user/<int:user_id>/details', methods=['GET', 'PUT'])
 @jwt_required()
 def update_user_details(user_id):
@@ -156,7 +158,7 @@ def update_user_details(user_id):
     db.session.commit()
     return jsonify({'message': 'User details updated successfully'}), 200
 
-
+# Endpoint activate and deactivate user
 @user_bp.route('/user/<int:user_id>/set_active', methods=['PUT'])
 @jwt_required()
 def set_user_active(user_id):

@@ -8,6 +8,7 @@ from datetime import datetime, timedelta
 
 borrow_bp = Blueprint('borrow', __name__)
 
+# Calculate return date 
 def calculate_return_date(borrow_date_str, return_type):
     borrow_date = datetime.strptime(borrow_date_str, '%d-%m-%Y')
     if return_type == 1:
@@ -19,6 +20,7 @@ def calculate_return_date(borrow_date_str, return_type):
     else:
         raise ValueError('Invalid return type')
 
+# Endpoint borrow a book
 @borrow_bp.route('/borrow_book', methods=['POST'])
 @jwt_required()
 def borrow_book():
@@ -64,6 +66,7 @@ def borrow_book():
         'return_date': return_date
     }), 201
 
+# Endpoint get all borrowed book
 @borrow_bp.route('/borrowed_books', methods=['GET'])
 @jwt_required()
 def get_all_borrowed_books():
@@ -90,6 +93,7 @@ def get_all_borrowed_books():
     ]
     return jsonify(borrowed_books_data), 200
 
+# Endpoint get user borrowed book
 @borrow_bp.route('/my_borrowed_books', methods=['GET'])
 @jwt_required()
 def get_user_borrowed_books():
@@ -109,7 +113,7 @@ def get_user_borrowed_books():
     ]
     return jsonify(borrowed_books_data), 200
 
-
+# Endpoint return book
 @borrow_bp.route('/return_book/<int:borrow_id>', methods=['GET', 'PUT'])
 @jwt_required()
 def return_book(borrow_id):

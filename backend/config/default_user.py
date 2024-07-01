@@ -2,6 +2,9 @@ from werkzeug.security import generate_password_hash
 from models.auth import User
 from models import db
 
+#TODO: change password for admin 
+
+# Creates a default admin user
 def create_default_admin():
     default_admin_email = "guy@guy.com"
     existing_user = User.query.filter_by(email=default_admin_email).first()

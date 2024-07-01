@@ -145,7 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (response.status === 201) {
                 message.innerHTML =
-                    '<div class="alert alert-success">Book added successfully</div>';
+                    `<div class="alert alert-success">Book added successfully</div>`;
                 fetchBooks();
             } else {
                 message.innerHTML =
