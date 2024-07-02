@@ -84,28 +84,6 @@ def get_user_borrowed_books():
     ]
     return jsonify(borrowed_books_data), 200
 
-# Endpoint get user borrowed books
-@borrow_bp.route('/my_borrowed_books', methods=['GET'])
-@jwt_required()
-def get_user_borrowed_books():
-    current_user_id = get_jwt_identity()
-    borrowed_books = BorrowedBook.query.filter_by(user_id=current_user_id).all()
-    borrowed_books_data = [
-        {
-            'id': borrowed_book.id,
-            'book_id': borrowed_book.book_id,
-            'borrow_date': borrowed_book.borrow_date,
-            'book_name': borrowed_book.book.name.title(),
-            'author': borrowed_book.book.author.title(),
-            'return_date': borrowed_book.return_date,
-            'late_return': borrowed_book.late_return,
-            'late_return_date': borrowed_book.late_return_date
-        }
-        for borrowed_book in borrowed_books
-    ]
-    return jsonify(borrowed_books_data), 200
-
-
 # Endpoint return book
 @borrow_bp.route('/return_book/<int:borrow_id>', methods=['GET', 'PUT'])
 @jwt_required()
