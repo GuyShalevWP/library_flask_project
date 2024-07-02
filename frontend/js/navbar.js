@@ -1,10 +1,21 @@
-// js/navbar.js
 document.addEventListener('DOMContentLoaded', () => {
     const token = localStorage.getItem('token');
-    const user = sessionStorage.getItem('user')
-        ? JSON.parse(sessionStorage.getItem('user'))
-        : null;
-    const role = user ? user.role : null;
+    let user = null;
+    let role = null;
+
+    if (token) {
+        try {
+            const decodedToken = jwt_decode(token);
+            user = decodedToken.sub; // Extract the user info from the token
+            role = user.role; // Extract the role
+
+            if (!role) {
+                console.error('Role is not defined in the token payload');
+            }
+        } catch (error) {
+            console.error('Error decoding token:', error);
+        }
+    }
 
     const authLinks = document.getElementById('authLinks');
     const customersLink = document.getElementById('customersLink');
@@ -12,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Check if the user is authenticated and update the navbar
     const updateNavbar = () => {
-        if (token) {
+        if (token && user) {
             const currentPath = window.location.pathname;
             let profileHref = 'pages/profile/profile.html';
             if (currentPath.includes('/pages/')) {
@@ -26,12 +37,10 @@ document.addEventListener('DOMContentLoaded', () => {
             <li class="nav-item">
                 <a class="nav-link" href="#" id="logout">Logout</a>
             </li>
-        
-    `;
+            `;
 
             document.getElementById('logout').addEventListener('click', () => {
                 localStorage.removeItem('token');
-                sessionStorage.removeItem('user');
                 // Redirect to home page
                 if (currentPath.endsWith('index.html') || currentPath === '/') {
                     window.location.href = 'index.html';
@@ -40,12 +49,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
 
-            if (
-                (role === 'admin' && customersLink) ||
-                (role === 'admin' && borrowedBooksLink)
-            ) {
-                customersLink.style.display = 'block';
-                borrowedBooksLink.style.display = 'block';
+            if (role === 'admin') {
+                if (customersLink) customersLink.style.display = 'block';
+                if (borrowedBooksLink)
+                    borrowedBooksLink.style.display = 'block';
             }
         }
     };
