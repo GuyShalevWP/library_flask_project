@@ -73,16 +73,16 @@ def serve_images(filename):
     return send_from_directory(current_app.config['UPLOAD_FOLDER'], filename)
 
 # Update book (name, author, release date, image)
-@book_bp.route('/update_book/<int:book_id>', methods=['GET', 'PUT'])
+@book_bp.route('/update_book/<int:book_id>', methods=['PUT'])
 @jwt_required()
 def update_book(book_id):
     current_user_id = get_jwt_identity()
     current_user = db.session.get(User, current_user_id)
-
+    
     if not current_user or current_user.role != 'admin':
         return jsonify({'message': 'Unauthorized to update books'}), 403
 
-    book = db.session.get(Books, book_id)
+    book = db.session.query(Books).get(book_id)
     if not book:
         return jsonify({'message': 'Book not found'}), 404
 
@@ -119,6 +119,7 @@ def update_book(book_id):
 
     db.session.commit()
     return jsonify({'message': 'Book updated successfully'}), 200
+
 
 
 # Inable disable a book (change is_available)

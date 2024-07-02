@@ -13,6 +13,8 @@
 
 ### Frontend
 
+-   continue the books implement CRUD with REST API
+
 ## Project Overview
 
 This project is a simple Flask-based RESTful API designed to manage a library system. It supports user account creation, authentication, book management, customer management, and book borrowings.

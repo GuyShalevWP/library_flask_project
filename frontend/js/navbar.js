@@ -1,21 +1,34 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const SERVER = 'http://localhost:7000';
     const token = localStorage.getItem('token');
     let user = null;
     let role = null;
 
-    if (token) {
-        try {
-            const decodedToken = jwt_decode(token);
-            user = decodedToken.sub; // Extract the user info from the token
-            role = user.role; // Extract the role
+    const fetchCurrentUser = async () => {
+        if (token) {
+            try {
+                const response = await axios.get(`${SERVER}/current_user`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
 
-            if (!role) {
-                console.error('Role is not defined in the token payload');
+                if (response.status === 200) {
+                    user = response.data;
+                    role = user.role;
+                    console.log('Current User:', user);
+
+                    // Store user information and role in localStorage
+                    localStorage.setItem('user', JSON.stringify(user));
+                    localStorage.setItem('role', role);
+
+                    updateNavbar(); // Update the navbar after fetching user info
+                } else {
+                    console.error('Failed to fetch current user info');
+                }
+            } catch (error) {
+                console.error('Error fetching current user info:', error);
             }
-        } catch (error) {
-            console.error('Error decoding token:', error);
         }
-    }
+    };
 
     const authLinks = document.getElementById('authLinks');
     const customersLink = document.getElementById('customersLink');
@@ -69,9 +82,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize page
     const initializePage = () => {
-        updateNavbar();
+        fetchCurrentUser(); // Fetch current user info on page load
         highlightCurrentPage();
     };
 
     initializePage();
+
+    window.getUserRole = () => role; // Expose a function to get the user role globally
 });

@@ -76,8 +76,8 @@
             </div>
         </nav>
 
-        <div class="container mt-5">
-            <h2 class="text-center">Books</h2>
+        <div class="container mt-3">
+            <h2 class="mt-3">Books List</h2>
 
             <div id="addBook" style="display: none">
                 <h3 class="mt-5">Add a New Book</h3>
@@ -123,13 +123,17 @@
                             placeholder="Image"
                         />
                     </div>
-                    <button type="submit" class="btn btn-primary">
+                    <button
+                        type="button"
+                        id="addBookButton"
+                        class="btn btn-primary"
+                        onclick="addBook()"
+                    >
                         Add Book
                     </button>
                 </form>
+                <div id="message" class="mt-3"></div>
             </div>
-
-            <div id="message" class="mt-3"></div>
 
             <div class="input-group mb-3">
                 <div class="input-group-prepend">
@@ -217,7 +221,11 @@
                                         placeholder="Image"
                                     />
                                 </div>
-                                <button type="submit" class="btn btn-primary">
+                                <button
+                                    type="button"
+                                    class="btn btn-primary"
+                                    onclick="updateBook()"
+                                >
                                     Update Book
                                 </button>
                             </form>

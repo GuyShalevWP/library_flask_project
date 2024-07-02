@@ -8,6 +8,28 @@ from datetime import datetime, timedelta
 
 user_bp = Blueprint('user', __name__)
 
+# get the current user info
+@user_bp.route('/current_user', methods=['GET'])
+@jwt_required()
+def get_current_user():
+    current_user_id = get_jwt_identity()
+    current_user = db.session.get(User, current_user_id)
+
+    if not current_user:
+        return jsonify({'message': 'User not found'}), 404
+
+    user_info = {
+        'id': current_user.id,
+        'email': current_user.email,
+        'first_name': current_user.first_name,
+        'last_name': current_user.last_name,
+        'phone': current_user.phone,
+        'is_active': current_user.is_active,
+        'role': current_user.role
+    }
+
+    return jsonify(user_info), 200
+
 # Endpoint get all users (only admin can see)
 @user_bp.route('/users', methods=['GET'])
 @jwt_required()

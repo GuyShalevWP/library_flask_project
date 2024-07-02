@@ -52,17 +52,8 @@ def login():
         if user.password_needs_reset:
             return jsonify({'message': 'Password needs to be reset. Please reset your password.'}), 403
 
-        user_info = {
-            'id': user.id,
-            'email': user.email,
-            'first_name': user.first_name,
-            'last_name': user.last_name,
-            'phone': user.phone,
-            'is_active': user.is_active,
-            'role': user.role
-        }
-        
-        access_token = create_access_token(identity=user_info)
+        # Store only the user ID in the token
+        access_token = create_access_token(identity=user.id)
         return jsonify({
             'message': 'Login successful',
             'access_token': access_token,
