@@ -12,7 +12,7 @@ def create_default_admin():
     if not existing_user:
         default_admin = User(
             email=default_admin_email,
-            password_hash=generate_password_hash("123"),
+            password_hash=generate_password_hash("123@123"),
             first_name="Guy",
             last_name="Guy",
             phone="1122334455",

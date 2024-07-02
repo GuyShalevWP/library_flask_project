@@ -9,7 +9,8 @@ class User(db.Model):
     last_name = db.Column(db.String(20), nullable=False)
     phone = db.Column(db.String(15), nullable=False)
     is_active = db.Column(db.Boolean, default=True, nullable=False)
-    role = db.Column(db.String(50), default='user', nullable=False)  # Add a role column
+    role = db.Column(db.String(50), default='user', nullable=False)
+    password_needs_reset = db.Column(db.Boolean, default=False, nullable=False)  # Add this field
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)

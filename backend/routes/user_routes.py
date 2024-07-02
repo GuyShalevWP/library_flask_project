@@ -2,6 +2,9 @@ from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from models.auth import User
 from models import db
+import re
+import secrets
+from datetime import datetime, timedelta
 
 user_bp = Blueprint('user', __name__)
 
@@ -85,16 +88,26 @@ def get_or_update_user(user_id):
     if request.method == 'PUT':
         data = request.get_json()
         new_email = data.get('email')
-        new_password = data.get('password')
+        new_first_name = data.get('first_name')
+        new_last_name = data.get('last_name')
+        new_phone = data.get('phone')
 
         if new_email:
+            # Validate email format
+            if not re.match(r"[^@]+@[^@]+\.[^@]+", new_email):
+                return jsonify({'message': 'Invalid email format. It must contain "@" and "."'}), 400
+
             existing_user = User.query.filter_by(email=new_email).first()
             if existing_user and existing_user.id != user_id:
                 return jsonify({'message': 'Email already registered'}), 409
             user_to_modify.email = new_email
 
-        if new_password:
-            user_to_modify.set_password(new_password)
+        if new_first_name:
+            user_to_modify.first_name = new_first_name
+        if new_last_name:
+            user_to_modify.last_name = new_last_name
+        if new_phone:
+            user_to_modify.phone = new_phone
 
         db.session.commit()
 
@@ -120,43 +133,65 @@ def change_password():
     if not current_user.check_password(old_password):
         return jsonify({'message': 'Old password is incorrect'}), 403
 
+    # Validate password length
+    if len(new_password) < 6:
+        return jsonify({'message': 'Password is too short. It must be at least 6 characters long.'}), 400
+
+    # Validate password for special character
+    if not re.search(r'[!@#$%^&*(),.?":{}|<>]', new_password):
+        return jsonify({'message': 'Password must contain at least one special character.'}), 400
+
     current_user.set_password(new_password)
     db.session.commit()
 
     return jsonify({'message': 'Password changed successfully'}), 200
 
-# Endpoint update details
-@user_bp.route('/user/<int:user_id>/details', methods=['GET', 'PUT'])
-@jwt_required()
-def update_user_details(user_id):
-    current_user_id = get_jwt_identity()
-    current_user = db.session.get(User, current_user_id)
 
-    if not current_user:
-        return jsonify({'message': 'User not found'}), 404
 
-    # Allow user to edit their own details or admin to edit any user
-    if current_user_id != user_id and current_user.role != 'admin':
-        return jsonify({'message': 'Unauthorized to modify this user'}), 403
-
-    user_to_update = db.session.get(User, user_id)
-    if not user_to_update:
-        return jsonify({'message': 'User not found'}), 404
-
+@user_bp.route('/user/request_reset_password', methods=['POST'])
+def request_reset_password():
     data = request.get_json()
-    new_first_name = data.get('first_name')
-    new_last_name = data.get('last_name')
-    new_phone = data.get('phone')
+    email = data.get('email')
+    
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        return jsonify({'message': 'User not found'}), 404
 
-    if new_first_name:
-        user_to_update.first_name = new_first_name
-    if new_last_name:
-        user_to_update.last_name = new_last_name
-    if new_phone:
-        user_to_update.phone = new_phone
+    # Generate a secure token
+    reset_token = secrets.token_urlsafe(32)
+    user.reset_token = reset_token
+    user.reset_token_expiration = datetime.utcnow() + timedelta(hours=1)  # Token valid for 1 hour
 
     db.session.commit()
-    return jsonify({'message': 'User details updated successfully'}), 200
+
+    return jsonify({'message': 'Password reset token generated. Use the following token to reset your password.', 'reset_token': reset_token}), 200
+
+@user_bp.route('/user/reset_password', methods=['POST'])
+def reset_password():
+    data = request.get_json()
+    email = data.get('email')
+    new_password = data.get('new_password')
+
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        return jsonify({'message': 'Invalid email address'}), 400
+
+    # Validate password length
+    if len(new_password) < 6:
+        return jsonify({'message': 'Password is too short. It must be at least 6 characters long.'}), 400
+
+    # Validate password for special character
+    if not re.search(r'[!@#$%^&*(),.?":{}|<>]', new_password):
+        return jsonify({'message': 'Password must contain at least one special character.'}), 400
+
+    user.set_password(new_password)
+    user.password_needs_reset = False  # Clear the flag
+    db.session.commit()
+
+    return jsonify({'message': 'Password has been reset successfully'}), 200
+
+
+
 
 # Endpoint activate and deactivate user
 @user_bp.route('/user/<int:user_id>/set_active', methods=['PUT'])
@@ -164,7 +199,10 @@ def update_user_details(user_id):
 def set_user_active(user_id):
     current_user_id = get_jwt_identity()
     current_user = db.session.get(User, current_user_id)
-    
+
+    if current_user_id == user_id and current_user.role == 'admin':
+        return jsonify({'message': 'Admin cannot deactivate their own account'}), 403
+
     if current_user_id != user_id and current_user.role != 'admin':
         return jsonify({'message': 'Unauthorized to modify this user'}), 403
 
@@ -177,9 +215,13 @@ def set_user_active(user_id):
 
     if isinstance(is_active, bool):
         user_to_update.is_active = is_active
+        if is_active:
+            user_to_update.password_needs_reset = True  # Set a flag indicating that the password needs to be reset
         db.session.commit()
         status = 'deactivated' if not is_active else 'activated'
         return jsonify({'message': f"User's active status set to {status}"}), 200
 
     return jsonify({'message': 'Invalid or missing \'is_active\' boolean value'}), 400
+
+
 
