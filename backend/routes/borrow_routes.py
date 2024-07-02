@@ -35,9 +35,6 @@ def borrow_book():
     borrow_date = data.get('borrow_date', datetime.utcnow().strftime('%d-%m-%Y'))
     return_type = data.get('return_type')
 
-    if return_type not in [1, 2, 3]:
-        return jsonify({'message': 'Invalid return type.'}), 400
-
     book = db.session.get(Books, book_id)
     if not book:
         return jsonify({'message': 'Book not found'}), 404
@@ -51,8 +48,8 @@ def borrow_book():
         user_id=current_user_id,
         book_id=book_id,
         borrow_date=borrow_date,
-        return_type=return_type,
-        return_date=return_date
+        return_date=return_date,
+        late_return=False
     )
 
     book.is_borrowed = True
@@ -61,39 +58,12 @@ def borrow_book():
 
     return jsonify({
         'message': 'Book borrowed successfully',
-        'book': {'name': book.name, 'author': book.author},
+        'book': {'name': book.name.title(), 'author': book.author.title()},
         'borrow_date': borrow_date,
         'return_date': return_date
     }), 201
 
-# Endpoint get all borrowed book
-@borrow_bp.route('/borrowed_books', methods=['GET'])
-@jwt_required()
-def get_all_borrowed_books():
-    current_user_id = get_jwt_identity()
-    current_user = db.session.get(User, current_user_id)
-
-    if current_user.role != 'admin':
-        return jsonify({'message': 'Unauthorized to access borrowed books'}), 403
-
-    borrowed_books = BorrowedBook.query.all()
-    borrowed_books_data = [
-        {
-            'id': borrowed_book.id,
-            'user_email': borrowed_book.user.email,
-            'first_name': borrowed_book.user.first_name,
-            'last_name': borrowed_book.user.last_name,
-            'book_name': borrowed_book.book.name,
-            'is_borrowed': borrowed_book.book.is_borrowed,
-            'return_type': borrowed_book.return_type,
-            'borrow_date': borrowed_book.borrow_date,
-            'return_date': borrowed_book.return_date if borrowed_book.return_type == 0 else calculate_return_date(borrowed_book.borrow_date, borrowed_book.return_type).strftime('%d-%m-%Y'),
-        }
-        for borrowed_book in borrowed_books
-    ]
-    return jsonify(borrowed_books_data), 200
-
-# Endpoint get user borrowed book
+# Endpoint for user borrowed books
 @borrow_bp.route('/my_borrowed_books', methods=['GET'])
 @jwt_required()
 def get_user_borrowed_books():
@@ -104,14 +74,37 @@ def get_user_borrowed_books():
             'id': borrowed_book.id,
             'book_id': borrowed_book.book_id,
             'borrow_date': borrowed_book.borrow_date,
-            'return_type': borrowed_book.return_type,
-            'book_name': borrowed_book.book.name,
-            'author': borrowed_book.book.author,
-            'return_date': borrowed_book.return_date if borrowed_book.return_type == 0 else calculate_return_date(borrowed_book.borrow_date, borrowed_book.return_type).strftime('%d-%m-%Y')
+            'book_name': borrowed_book.book.name.title(),
+            'author': borrowed_book.book.author.title(),
+            'return_date': borrowed_book.return_date,
+            'late_return': borrowed_book.late_return,
+            'late_return_date': borrowed_book.late_return_date
         }
         for borrowed_book in borrowed_books
     ]
     return jsonify(borrowed_books_data), 200
+
+# Endpoint get user borrowed books
+@borrow_bp.route('/my_borrowed_books', methods=['GET'])
+@jwt_required()
+def get_user_borrowed_books():
+    current_user_id = get_jwt_identity()
+    borrowed_books = BorrowedBook.query.filter_by(user_id=current_user_id).all()
+    borrowed_books_data = [
+        {
+            'id': borrowed_book.id,
+            'book_id': borrowed_book.book_id,
+            'borrow_date': borrowed_book.borrow_date,
+            'book_name': borrowed_book.book.name.title(),
+            'author': borrowed_book.book.author.title(),
+            'return_date': borrowed_book.return_date,
+            'late_return': borrowed_book.late_return,
+            'late_return_date': borrowed_book.late_return_date
+        }
+        for borrowed_book in borrowed_books
+    ]
+    return jsonify(borrowed_books_data), 200
+
 
 # Endpoint return book
 @borrow_bp.route('/return_book/<int:borrow_id>', methods=['GET', 'PUT'])
@@ -130,8 +123,14 @@ def return_book(borrow_id):
     book = db.session.get(Books, borrowed_book.book_id)
     book.is_borrowed = False
 
-    borrowed_book.return_type = 0  # Assuming return_type 0 indicates the book has been returned
-    borrowed_book.return_date = datetime.utcnow().strftime('%d-%m-%Y')  # Set return_date to current date
+    current_date = datetime.utcnow()
+    original_return_date = datetime.strptime(borrowed_book.return_date, '%d-%m-%Y')
+
+    if current_date > original_return_date:
+        borrowed_book.late_return = True
+        borrowed_book.late_return_date = original_return_date.strftime('%d-%m-%Y')
+
+    borrowed_book.return_date = current_date.strftime('%d-%m-%Y')  # Set return_date to current date
 
     db.session.commit()
     return jsonify({'message': 'Book returned successfully'}), 200

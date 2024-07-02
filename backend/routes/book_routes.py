@@ -12,40 +12,39 @@ book_bp = Blueprint('books', __name__)
 
 # Add book
 @book_bp.route('/add_book', methods=['POST'])
-@jwt_required()
 def add_book():
-    current_user_id = get_jwt_identity()
-    current_user = db.session.get(User, current_user_id)
-    
-    if current_user.role != 'admin':
-        return jsonify({'message': 'Unauthorized to add books'}), 403
-
     data = request.form
-    img_file = request.files.get('img')
     name = data.get('name')
     author = data.get('author')
     release_date = data.get('release_date')
+    img = data.get('img')
+    return_type = data.get('return_type', 1)  # Default return type if not provided
 
-    if not name or not author or not release_date or not img_file:
+    if not name or not author or not release_date or not return_type:
         return jsonify({'message': 'Missing required fields'}), 400
-
-    #TODO: check if book name and author exists
     
-    if Books.query.filter_by(name=name).first():
-        return jsonify({'message': 'Book already exists'}), 409
+    if return_type not in [1, 2, 3]:
+        return jsonify({'message': 'Invalid return type.'}), 400
 
-    filename = secure_filename(name + '.' + img_file.filename.rsplit('.', 1)[1].lower())
-    img_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
-    img_file.save(img_path)
+    # Check if a book with the same name and author already exists
+    existing_book = Books.query.filter_by(name=name, author=author).first()
+    if existing_book:
+        return jsonify({'message': 'A book with the same name and author already exists.'}), 409
+
+    # Capitalize the first letter of each word in the author and name of the book
+    name = name.title()
+    author = author.title()
 
     new_book = Books(
         name=name,
         author=author,
         release_date=release_date,
-        img=filename,
+        img=img,
+        return_type=return_type,
         is_borrowed=False,
         is_available=True
     )
+
     db.session.add(new_book)
     db.session.commit()
 
@@ -63,7 +62,8 @@ def get_books():
             'release_date': book.release_date,
             'img': book.img,
             'is_borrowed': book.is_borrowed,
-            'is_available': book.is_available
+            'is_available': book.is_available,
+            'return_type': book.return_type
         }
         for book in books
     ]
@@ -90,18 +90,38 @@ def update_book(book_id):
 
     data = request.form
     img_file = request.files.get('img')
-    book.name = data.get('name', book.name)
-    book.author = data.get('author', book.author)
-    book.release_date = data.get('release_date', book.release_date)
+    name = data.get('name', book.name).title()
+    author = data.get('author', book.author).title()
+    release_date = data.get('release_date', book.release_date)
+    return_type = data.get('return_type', book.return_type)
+
+    # Check if any required field is empty
+    if not name or not author or not release_date or not return_type:
+        return jsonify({'message': 'Missing required fields'}), 400
+
+    # Check if the return type is valid
+    if int(return_type) not in [1, 2, 3]:
+        return jsonify({'message': 'Invalid return type.'}), 400
+
+    # Check if a book with the same name and author already exists
+    existing_book = Books.query.filter_by(name=name, author=author).first()
+    if existing_book and existing_book.id != book_id:
+        return jsonify({'message': 'A book with the same name and author already exists.'}), 409
+
+    book.name = name
+    book.author = author
+    book.release_date = release_date
+    book.return_type = return_type
 
     if img_file:
-        filename = secure_filename(book.name + '.' + img_file.filename.rsplit('.', 1)[1].lower())
+        filename = secure_filename(book.name + book.author + '.' + img_file.filename.rsplit('.', 1)[1].lower())
         img_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
         img_file.save(img_path)
         book.img = filename
 
     db.session.commit()
     return jsonify({'message': 'Book updated successfully'}), 200
+
 
 # Inable disable a book (change is_available)
 @book_bp.route('/delete_book/<int:book_id>', methods=['PUT'])
