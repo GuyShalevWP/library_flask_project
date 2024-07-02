@@ -1,10 +1,9 @@
 const SERVER = 'http://localhost:7000';
-const registerForm = document.getElementById('registerForm');
 
 const login = () => {
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
-    const message = document.getElementById('message');
+    const message = document.getElementById('messageModalBody');
 
     axios
         .post(`${SERVER}/login`, {
@@ -18,74 +17,64 @@ const login = () => {
             localStorage.setItem('token', token); // Store token in localStorage
 
             message.innerHTML = `<div class="alert alert-success">${msg}</div>`;
+            $('#messageModal').modal('show');
 
-            // Wait for 1 second before redirecting
+            // Wait for 2 second before redirecting
             setTimeout(() => {
-                window.location.href = '../../index.html'; // Redirect to home page
-            }, 1000);
+                window.location.href = '../../index.html';
+            }, 2000);
         })
-
         .catch((error) => {
             console.error('Error during login:', error);
             const errorMessage =
                 error.response?.data?.message || 'Invalid email or password';
             message.innerHTML = `<div class="alert alert-danger">${errorMessage}</div>`;
+            $('#messageModal').modal('show');
         });
 };
 
-const register = async (event) => {
-    event.preventDefault();
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-    const retype_password = document.getElementById('retype_password').value;
-    const first_name = document.getElementById('first_name').value;
-    const last_name = document.getElementById('last_name').value;
+const register = () => {
+    const email = document.getElementById('reg_email').value;
+    const password = document.getElementById('reg_password').value;
+    const confirmPassword = document.getElementById('confirm_password').value;
+    const firstName = document.getElementById('first_name').value;
+    const lastName = document.getElementById('last_name').value;
     const phone = document.getElementById('phone').value;
+    const role = document.getElementById('role').value || 'user';
+    const message = document.getElementById('messageModalBody');
 
-    if (password !== retype_password) {
-        document.getElementById('message').innerHTML =
-            '<div class="alert alert-danger">Passwords do not match</div>';
+    if (password !== confirmPassword) {
+        message.innerHTML = `<div class="alert alert-danger">Passwords do not match</div>`;
+        $('#messageModal').modal('show');
         return;
     }
 
-    console.log('Registration Attempt:', {
-        email,
-        password,
-        first_name,
-        last_name,
-        phone,
-    });
+    axios
+        .post(`${SERVER}/register`, {
+            email: email,
+            password: password,
+            first_name: firstName,
+            last_name: lastName,
+            phone: phone,
+            role: role,
+        })
+        .then((response) => {
+            const msg = response.data.message;
 
-    try {
-        const response = await axios.post(`${SERVER}/register`, {
-            email,
-            password,
-            first_name,
-            last_name,
-            phone,
+            message.innerHTML = `<div class="alert alert-success">${msg}</div>`;
+            $('#messageModal').modal('show');
+
+            // Wait for 2 second before redirecting to login page
+            setTimeout(() => {
+                window.location.href = './signin.html';
+            }, 2000);
+        })
+        .catch((error) => {
+            console.error('Error during registration:', error);
+            const errorMessage =
+                error.response?.data?.message ||
+                'Registration failed. Please try again.';
+            message.innerHTML = `<div class="alert alert-danger">${errorMessage}</div>`;
+            $('#messageModal').modal('show');
         });
-
-        if (response.status === 201) {
-            document.getElementById('message').innerHTML =
-                '<div class="alert alert-success">Registration successful</div>';
-            // Redirect to sign-in page
-            window.location.href = 'signin.html';
-        } else {
-            document.getElementById('message').innerHTML =
-                '<div class="alert alert-danger">Registration failed</div>';
-        }
-    } catch (error) {
-        console.error('Error during registration:', error);
-        const errorMessage =
-            error.response && error.response.data && error.response.data.message
-                ? error.response.data.message
-                : 'Registration failed';
-        document.getElementById(
-            'message'
-        ).innerHTML = `<div class="alert alert-danger">${errorMessage}</div>`;
-    }
 };
-
-if (registerForm) {
-    registerForm.addEventListener('submit', register);
-}
