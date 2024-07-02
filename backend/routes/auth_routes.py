@@ -6,10 +6,6 @@ import re
 
 auth_bp = Blueprint('auth', __name__ ) #url_prefix='/auth'
 
-#TODO: add errors in case the password too short, or missing special char
-#TODO: add errors in case the email don't contain @ and .
-#TODO: before commit change first latter of first name and last name to be capitalized
-
 # Register
 @auth_bp.route('/register', methods=['POST'])
 def register():

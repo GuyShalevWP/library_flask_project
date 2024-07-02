@@ -8,8 +8,6 @@ from models import db
 
 book_bp = Blueprint('books', __name__)
 
-#TODO: before commit change first latter of name and author to be capitalized
-
 # Add book
 @book_bp.route('/add_book', methods=['POST'])
 def add_book():
