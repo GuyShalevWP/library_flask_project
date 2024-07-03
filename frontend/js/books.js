@@ -8,6 +8,7 @@ const booksList = document.getElementById('booksList');
 const updateBookForm = document.getElementById('updateBookForm');
 const confirmDeleteButton = document.getElementById('confirmDeleteButton');
 let currentBookId = null;
+let currentReturnType = null;
 let currentBookIsAvailable = null;
 
 // Get error message
@@ -22,6 +23,13 @@ const validateForm = (formData) => {
     }
     return true;
 };
+
+const checkBorrowLength = (returnType) =>
+    ({
+        1: '10 days',
+        2: '5 days',
+        3: '2 days',
+    }[returnType] || 'Unknown');
 
 // Fetch books from Flask endpoint
 const fetchBooks = async () => {
@@ -63,13 +71,6 @@ const renderBooksTable = (books) => {
         return matchesSearch;
     });
 
-    const checkBorrowLength = (returnType) =>
-        ({
-            1: '10 days',
-            2: '5 days',
-            3: '2 days',
-        }[returnType] || 'Unknown');
-
     booksList.innerHTML = filteredBooks
         .map(
             (book) => `
@@ -96,10 +97,26 @@ const renderBooksTable = (books) => {
                                             ? 'Unavailable'
                                             : 'Available'
                                     }</p>
+
+                                    ${
+                                        !role
+                                            ? ``
+                                            : `<button class="btn btn-primary" 
+                                            style="display: ${
+                                                book.is_borrowed ? 'none' : ''
+                                            } " 
+                                            onclick="showBorrowBook(
+                                            ${book.id}, 
+                                            '${book.name}', 
+                                            ${book.return_type}, 
+                                            )">Borrow
+                                        </button>`
+                                    }
+
                                     ${
                                         role !== 'admin'
                                             ? ''
-                                            : `<button class="btn btn-primary" onclick="showEditModal(
+                                            : `<button class="btn btn-secondary" onclick="showEditModal(
                                             ${book.id}, 
                                             '${book.name}', 
                                             '${book.author}', 
@@ -269,6 +286,46 @@ const toggleBookAvailability = async () => {
             error.response?.data?.message ||
             `Failed to ${currentBookIsAvailable ? 'delete' : 'restore'} book`;
         message.innerHTML = `<div class="alert alert-danger">${errorMessage}</div>`;
+    }
+};
+
+// Show borrow modal
+window.showBorrowBook = (id, bookName, returnType) => {
+    currentBookId = id;
+    currentReturnType = returnType;
+    document.getElementById('confirmBookName').innerText = bookName;
+    document.getElementById('confirmBorrowLength').innerText =
+        checkBorrowLength(returnType);
+    $('#confirmBorrowModal').modal('show');
+};
+
+// Borrow book
+const borrowBook = async () => {
+    try {
+        const response = await axios.post(
+            `${SERVER}/borrow_book`,
+            {
+                book_id: currentBookId,
+                return_type: currentReturnType,
+            },
+            {
+                headers: { Authorization: `Bearer ${token}` },
+            }
+        );
+
+        if (response.status === 201) {
+            showMessage('Book borrowed successfully', 'success');
+            $('#confirmBorrowModal').modal('hide');
+            fetchBooks();
+        } else {
+            showMessage('Failed to borrow book', 'danger');
+        }
+    } catch (error) {
+        console.error('Error borrowing book:', error);
+        const errorMessage =
+            error.response?.data?.message ||
+            'Failed to borrow book. Please try again.';
+        showMessage(errorMessage, 'danger');
     }
 };
 
