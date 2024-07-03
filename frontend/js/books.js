@@ -5,12 +5,23 @@ const role = localStorage.getItem('role');
 
 const message = document.getElementById('message');
 const booksList = document.getElementById('booksList');
-const addBookForm = document.getElementById('addBookForm');
+const updateBookForm = document.getElementById('updateBookForm');
+const confirmDeleteButton = document.getElementById('confirmDeleteButton');
 let currentBookId = null;
 let currentBookIsAvailable = null;
 
-const updateBookForm = document.getElementById('updateBookForm');
-const confirmDeleteButton = document.getElementById('confirmDeleteButton');
+// Get error message
+const showMessage = (msg, type) => {
+    message.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
+};
+
+// Validate form
+const validateForm = (formData) => {
+    for (const [key, value] of formData.entries()) {
+        if (!value) return false;
+    }
+    return true;
+};
 
 // Fetch books from Flask endpoint
 const fetchBooks = async () => {
@@ -28,6 +39,7 @@ const fetchBooks = async () => {
     }
 };
 
+// Renders and printing the books
 const renderBooksTable = (books) => {
     const searchInput = document
         .getElementById('searchInput')
@@ -51,6 +63,13 @@ const renderBooksTable = (books) => {
         return matchesSearch;
     });
 
+    const checkBorrowLength = (returnType) =>
+        ({
+            1: '10 days',
+            2: '5 days',
+            3: '2 days',
+        }[returnType] || 'Unknown');
+
     booksList.innerHTML = filteredBooks
         .map(
             (book) => `
@@ -69,6 +88,9 @@ const renderBooksTable = (books) => {
                                     <p class="card-text">Release Date: ${
                                         book.release_date
                                     }</p>
+                                    <p class="card-text">Borrow for: ${checkBorrowLength(
+                                        book.return_type
+                                    )}</p>
                                     <p class="card-text">Status: ${
                                         book.is_borrowed
                                             ? 'Unavailable'
@@ -82,6 +104,7 @@ const renderBooksTable = (books) => {
                                             '${book.name}', 
                                             '${book.author}', 
                                             '${book.release_date}', 
+                                            '${book.return_type}', 
                                             '${book.img}'
                                             )">Edit
                                         </button>
@@ -119,53 +142,42 @@ const renderBooksTable = (books) => {
 };
 
 // Add book
-const addBook = () => {
-    const name = document.getElementById('name').value;
-    const author = document.getElementById('author').value;
-    const releaseDate = document.getElementById('release_date').value;
-    const img = document.getElementById('img').files[0];
-    const message = document.getElementById('message');
+const addBook = async () => {
+    const formData = new FormData(document.getElementById('addBookForm'));
 
-    if (!name || !author || !releaseDate || !img) {
-        message.innerHTML = `<div class="alert alert-danger">Please fill all the fields</div>`;
+    if (!validateForm(formData)) {
+        showMessage('Please fill all the fields', 'danger');
         return;
     }
 
-    const formData = new FormData();
-    formData.append('name', name);
-    formData.append('author', author);
-    formData.append('release_date', releaseDate);
-    formData.append('img', img);
-
-    axios
-        .post(`${SERVER}/add_book`, formData, {
+    try {
+        const response = await axios.post(`${SERVER}/add_book`, formData, {
             headers: { Authorization: `Bearer ${token}` },
-        })
-        .then((response) => {
-            const msg = response.data.message;
-
-            message.innerHTML = `<div class="alert alert-success">${msg}</div>`;
-
-            // Optionally, clear the form fields
-            document.getElementById('addBookForm').reset();
-
-            fetchBooks();
-        })
-        .catch((error) => {
-            console.error('Error adding book:', error);
-            const errorMessage =
-                error.response?.data?.message ||
-                'Failed to add book. Please try again.';
-            message.innerHTML = `<div class="alert alert-danger">${errorMessage}</div>`;
         });
+
+        if (response.status === 201) {
+            showMessage(response.data.message, 'success');
+            document.getElementById('addBookForm').reset();
+            fetchBooks();
+        } else {
+            showMessage('Failed to add book', 'danger');
+        }
+    } catch (error) {
+        console.error('Error adding book:', error);
+        const errorMessage =
+            error.response?.data?.message ||
+            'Failed to add book. Please try again.';
+        showMessage(errorMessage, 'danger');
+    }
 };
 
 // Show edit modal
-window.showEditModal = (id, name, author, releaseDate, img) => {
+window.showEditModal = (id, name, author, releaseDate, returnType, img) => {
     currentBookId = id;
     document.getElementById('updateName').value = name;
     document.getElementById('updateAuthor').value = author;
     document.getElementById('updateReleaseDate').value = releaseDate;
+    document.getElementById('updateBorrowLength').value = returnType;
     document.getElementById('updateImg').value = '';
     $('#updateBookModal').modal('show');
 };
@@ -173,7 +185,11 @@ window.showEditModal = (id, name, author, releaseDate, img) => {
 // Update book
 const updateBook = async () => {
     const formData = new FormData(document.getElementById('updateBookForm'));
-    const message = document.getElementById('message');
+
+    if (!validateForm(formData)) {
+        showMessage('Please fill all the fields', 'danger');
+        return;
+    }
 
     try {
         const headers = {
@@ -189,19 +205,17 @@ const updateBook = async () => {
         );
 
         if (response.status === 200) {
-            message.innerHTML =
-                '<div class="alert alert-success">Book updated successfully</div>';
+            showMessage('Book updated successfully', 'success');
             $('#updateBookModal').modal('hide');
             fetchBooks();
         } else {
-            message.innerHTML =
-                '<div class="alert alert-danger">Failed to update book</div>';
+            showMessage('Failed to update book', 'danger');
         }
     } catch (error) {
         console.error('Error updating book:', error);
         const errorMessage =
             error.response?.data?.message || 'Failed to update book';
-        message.innerHTML = `<div class="alert alert-danger">${errorMessage}</div>`;
+        showMessage(errorMessage, 'danger');
     }
 };
 

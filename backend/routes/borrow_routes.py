@@ -4,21 +4,11 @@ from models.borrow import BorrowedBook
 from models.books import Books
 from models.auth import User
 from models import db
-from datetime import datetime, timedelta
+from utils.calculate_return_date import calculate_return_date
+from datetime import datetime
 
 borrow_bp = Blueprint('borrow', __name__)
 
-# Calculate return date 
-def calculate_return_date(borrow_date_str, return_type):
-    borrow_date = datetime.strptime(borrow_date_str, '%d-%m-%Y')
-    if return_type == 1:
-        return borrow_date + timedelta(days=10)
-    elif return_type == 2:
-        return borrow_date + timedelta(days=5)
-    elif return_type == 3:
-        return borrow_date + timedelta(days=2)
-    else:
-        raise ValueError('Invalid return type')
 
 # Endpoint borrow a book
 @borrow_bp.route('/borrow_book', methods=['POST'])
@@ -32,8 +22,11 @@ def borrow_book():
 
     data = request.get_json()
     book_id = data.get('book_id')
-    borrow_date = data.get('borrow_date', datetime.utcnow().strftime('%d-%m-%Y'))
     return_type = data.get('return_type')
+    borrow_date = data.get('borrow_date', datetime.utcnow().strftime('%d-%m-%Y'))
+
+    if not book_id or not return_type:
+        return jsonify({'message': 'Missing required fields'}), 400
 
     book = db.session.get(Books, book_id)
     if not book:
@@ -42,7 +35,10 @@ def borrow_book():
     if book.is_borrowed:
         return jsonify({'message': 'Book is already borrowed'}), 409
 
-    return_date = calculate_return_date(borrow_date, return_type).strftime('%d-%m-%Y')
+    try:
+        return_date = calculate_return_date(borrow_date, return_type).strftime('%d-%m-%Y')
+    except ValueError as e:
+        return jsonify({'message': str(e)}), 400
 
     borrowed_book = BorrowedBook(
         user_id=current_user_id,
