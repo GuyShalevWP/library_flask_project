@@ -7,10 +7,10 @@ const message = document.getElementById('message');
 const booksList = document.getElementById('booksList');
 const addBookForm = document.getElementById('addBookForm');
 let currentBookId = null;
+let currentBookIsAvailable = null;
 
 const updateBookForm = document.getElementById('updateBookForm');
 const confirmDeleteButton = document.getElementById('confirmDeleteButton');
-let currentBookIsAvailable = true;
 
 // Fetch books from Flask endpoint
 const fetchBooks = async () => {
@@ -54,47 +54,65 @@ const renderBooksTable = (books) => {
     booksList.innerHTML = filteredBooks
         .map(
             (book) => `
-            <div class="card mt-3">
-                <div class="row no-gutters">
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <h5 class="card-title">${book.name}</h5>
-                            <p class="card-text">Author: ${book.author}</p>
-                            <p class="card-text">Release Date: ${
-                                book.release_date
-                            }</p>
-                            <p class="card-text">Status: ${
-                                book.is_borrowed ? 'Unavailable' : 'Available'
-                            }</p>
-                            ${
-                                role === 'admin'
-                                    ? `<button class="btn btn-primary" onclick="showEditModal(${
-                                          book.id
-                                      }, '${book.name}', '${book.author}', '${
-                                          book.release_date
-                                      }', '${book.img}')">Edit</button>
-                            <button class="btn ${
-                                book.is_available ? 'btn-danger' : 'btn-success'
-                            }" onclick="showDeleteModal(${book.id}, ${
-                                          book.is_available
-                                      })">${
-                                          book.is_available
-                                              ? 'Delete'
-                                              : 'Restore'
-                                      }</button>`
-                                    : ''
-                            }
+            ${
+                role !== 'admin' && !book.is_available
+                    ? ``
+                    : `
+                    <div class="card mt-3">
+                        <div class="row no-gutters">
+                            <div class="col-md-8">
+                                <div class="card-body">
+                                    <h5 class="card-title">${book.name}</h5>
+                                    <p class="card-text">Author: ${
+                                        book.author
+                                    }</p>
+                                    <p class="card-text">Release Date: ${
+                                        book.release_date
+                                    }</p>
+                                    <p class="card-text">Status: ${
+                                        book.is_borrowed
+                                            ? 'Unavailable'
+                                            : 'Available'
+                                    }</p>
+                                    ${
+                                        role !== 'admin'
+                                            ? ''
+                                            : `<button class="btn btn-primary" onclick="showEditModal(
+                                            ${book.id}, 
+                                            '${book.name}', 
+                                            '${book.author}', 
+                                            '${book.release_date}', 
+                                            '${book.img}'
+                                            )">Edit
+                                        </button>
+                                        <button class="btn ${
+                                            book.is_available
+                                                ? 'btn-danger'
+                                                : 'btn-success'
+                                        }" 
+                                        onclick="showDeleteModal(
+                                            ${book.id}, 
+                                            ${book.is_available}
+                                        )">
+                                        ${
+                                            book.is_available
+                                                ? 'Delete'
+                                                : 'Restore'
+                                        }
+                                        </button>`
+                                    }
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <img 
+                                    src="${SERVER}/assets/images/${book.img}" 
+                                    class="card-img" alt="${book.name}" 
+                                    style="max-width: 100%; height: auto;">
+                            </div>
                         </div>
                     </div>
-                    <div class="col-md-4">
-                        <img src="${SERVER}/assets/images/${
-                book.img
-            }" class="card-img" alt="${
-                book.name
-            }" style="max-width: 100%; height: auto;">
-                    </div>
-                </div>
-            </div>
+                `
+            }
         `
         )
         .join('');

@@ -163,7 +163,7 @@ def update_book(book_id):
 
 
 
-# Inable disable a book (change is_available)
+# Enable/Disable a book (change is_available)
 @book_bp.route('/delete_book/<int:book_id>', methods=['PUT'])
 @jwt_required()
 def delete_book(book_id):
@@ -186,4 +186,4 @@ def delete_book(book_id):
         status = 'deleted' if not is_available else 'restored'
         return jsonify({'message': f"Book has been {status} successfully"}), 200
 
-    return jsonify({'message': 'Invalid or missing \'is_available\' boolean value'}), 400
+    return jsonify({'message': 'Invalid or missing "is_available" boolean value'}), 400
