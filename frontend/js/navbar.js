@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let user = null;
     let role = null;
 
-    // get user ditails and make sure it will keep the role on refresh
+    // Fetch current user details and store role on refresh
     const fetchCurrentUser = async () => {
         if (token) {
             try {
@@ -55,6 +55,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             document.getElementById('logout').addEventListener('click', () => {
                 localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                localStorage.removeItem('role');
                 // Redirect to home page
                 if (currentPath.endsWith('index.html') || currentPath === '/') {
                     window.location.href = 'index.html';
@@ -76,7 +78,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.nav-item a.nav-link').forEach((item) => {
             if (item.href === window.location.href) {
                 item.classList.add('active');
-                item.innerHTML += ' <span class="sr-only">(current)</span>';
             }
         });
     };

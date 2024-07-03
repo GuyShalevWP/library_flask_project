@@ -4,16 +4,11 @@
 
 ### Backend
 
-1. `backend/routes/book_routes.py`
-
-    - **Endpoint add_book** :
-        - change image size
-    - **Endpoint update_book** :
-        - change image size
-
 ### Frontend
 
--   continue the books implement CRUD with REST API
+-   implement CRUD with REST API for customers
+-   implement CRUD with REST API borrowed books in profile
+-   fix the rest of the bootstrap
 
 ## Project Overview
 

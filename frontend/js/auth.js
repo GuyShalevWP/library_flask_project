@@ -1,36 +1,71 @@
 const SERVER = 'http://localhost:7000';
 
-const login = () => {
+const showMessage = (msg, type) => {
+    const message = document.getElementById('messageModalBody');
+    message.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
+    const messageModal = new bootstrap.Modal(
+        document.getElementById('messageModal')
+    );
+    messageModal.show();
+};
+
+const showError = (msg) => {
+    const message = document.getElementById('messageModalBody');
+    message.innerHTML = `<div class="alert alert-danger">${msg}</div>`;
+    const messageModal = new bootstrap.Modal(
+        document.getElementById('messageModal')
+    );
+    messageModal.show();
+};
+
+const validateForm = ({
+    email,
+    password,
+    confirmPassword,
+    firstName,
+    lastName,
+    phone,
+}) => {
+    return (
+        email && password && confirmPassword && firstName && lastName && phone
+    );
+};
+
+const login = async () => {
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
-    const message = document.getElementById('messageModalBody');
 
-    axios
-        .post(`${SERVER}/login`, {
-            email: email,
-            password: password,
-        })
-        .then((response) => {
+    if (!email || !password) {
+        showError('Please fill all the fields');
+        return;
+    }
+
+    try {
+        const response = await axios.post(`${SERVER}/login`, {
+            email,
+            password,
+        });
+
+        if (response.status === 200) {
             const token = response.data.access_token;
             const msg = response.data.message;
 
             localStorage.setItem('token', token); // Store token in localStorage
+            showMessage(msg, 'success');
 
-            message.innerHTML = `<div class="alert alert-success">${msg}</div>`;
-            $('#messageModal').modal('show');
-
-            // Wait for 2 second before redirecting
+            // Wait for 2 seconds before redirecting
             setTimeout(() => {
                 window.location.href = '../../index.html';
             }, 2000);
-        })
-        .catch((error) => {
-            console.error('Error during login:', error);
-            const errorMessage =
-                error.response?.data?.message || 'Invalid email or password';
-            message.innerHTML = `<div class="alert alert-danger">${errorMessage}</div>`;
-            $('#messageModal').modal('show');
-        });
+        } else {
+            showError('Invalid email or password');
+        }
+    } catch (error) {
+        console.error('Error during login:', error);
+        const errorMessage =
+            error.response?.data?.message || 'Invalid email or password';
+        showError(errorMessage);
+    }
 };
 
 const register = () => {
@@ -40,7 +75,7 @@ const register = () => {
     const firstName = document.getElementById('first_name').value;
     const lastName = document.getElementById('last_name').value;
     const phone = document.getElementById('phone').value;
-    const role = document.getElementById('role').value || 'user';
+
     const message = document.getElementById('messageModalBody');
 
     if (password !== confirmPassword) {
@@ -56,7 +91,6 @@ const register = () => {
             first_name: firstName,
             last_name: lastName,
             phone: phone,
-            role: role,
         })
         .then((response) => {
             const msg = response.data.message;
@@ -64,10 +98,7 @@ const register = () => {
             message.innerHTML = `<div class="alert alert-success">${msg}</div>`;
             $('#messageModal').modal('show');
 
-            // Wait for 2 second before redirecting to login page
-            setTimeout(() => {
-                window.location.href = './signin.html';
-            }, 2000);
+            window.location.href = './signin.html';
         })
         .catch((error) => {
             console.error('Error during registration:', error);

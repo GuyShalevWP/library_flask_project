@@ -74,86 +74,81 @@ const renderBooksTable = (books) => {
     booksList.innerHTML = filteredBooks
         .map(
             (book) => `
-            ${
-                role !== 'admin' && !book.is_available
-                    ? ``
-                    : `
-                    <div class="card mt-3">
-                        <div class="row no-gutters">
-                            <div class="col-md-8">
-                                <div class="card-body">
-                                    <h5 class="card-title">${book.name}</h5>
-                                    <p class="card-text">Author: ${
-                                        book.author
-                                    }</p>
-                                    <p class="card-text">Release Date: ${
-                                        book.release_date
-                                    }</p>
-                                    <p class="card-text">Borrow for: ${checkBorrowLength(
-                                        book.return_type
-                                    )}</p>
-                                    <p class="card-text">Status: ${
-                                        book.is_borrowed
-                                            ? 'Unavailable'
-                                            : 'Available'
-                                    }</p>
+        ${
+            role !== 'admin' && !book.is_available
+                ? ``
+                : `
+                <div class="card mb-3" style="max-width: 540px;">
+                    <div class="row g-0">
+                        <div class="col-md-5">
+                            <img 
+                                src="${SERVER}/assets/images/${book.img}" 
+                                class="img-fluid rounded-start" 
+                                alt="${book.name}" 
+                                style="height: 100%;">
+                        </div>
+                        <div class="col-md-7 ">
+                            <div class="card-body ">
+                                <h5 class="card-title">${book.name}</h5>
+                                <p class="card-text">Author: ${book.author}</p>
+                                <p class="card-text">Release Date: ${
+                                    book.release_date
+                                }</p>
+                                <p class="card-text">Borrow for: ${checkBorrowLength(
+                                    book.return_type
+                                )}</p>
+                                <p class="card-text">Status: ${
+                                    book.is_borrowed
+                                        ? 'Unavailable'
+                                        : 'Available'
+                                }</p>
 
-                                    ${
-                                        !role
-                                            ? ``
-                                            : `<button class="btn btn-primary" 
-                                            style="display: ${
-                                                book.is_borrowed ? 'none' : ''
-                                            } " 
-                                            onclick="showBorrowBook(
-                                            ${book.id}, 
-                                            '${book.name}', 
-                                            ${book.return_type}, 
-                                            )">Borrow
-                                        </button>`
-                                    }
-
-                                    ${
-                                        role !== 'admin'
-                                            ? ''
-                                            : `<button class="btn btn-secondary" onclick="showEditModal(
-                                            ${book.id}, 
-                                            '${book.name}', 
-                                            '${book.author}', 
-                                            '${book.release_date}', 
-                                            '${book.return_type}', 
-                                            '${book.img}'
-                                            )">Edit
-                                        </button>
-                                        <button class="btn ${
-                                            book.is_available
-                                                ? 'btn-danger'
-                                                : 'btn-success'
+                                ${
+                                    !role
+                                        ? ``
+                                        : `<button class="btn btn-primary" 
+                                        style="display: ${
+                                            book.is_borrowed ? 'none' : ''
                                         }" 
-                                        onclick="showDeleteModal(
-                                            ${book.id}, 
-                                            ${book.is_available}
-                                        )">
-                                        ${
-                                            book.is_available
-                                                ? 'Delete'
-                                                : 'Restore'
-                                        }
-                                        </button>`
-                                    }
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <img 
-                                    src="${SERVER}/assets/images/${book.img}" 
-                                    class="card-img" alt="${book.name}" 
-                                    style="max-width: 100%; height: auto;">
+                                        onclick="showBorrowBook(
+                                        ${book.id}, 
+                                        '${book.name}', 
+                                        ${book.return_type}
+                                        )">Borrow
+                                    </button>`
+                                }
+
+                                ${
+                                    role !== 'admin'
+                                        ? ''
+                                        : `<button class="btn btn-secondary" onclick="showEditModal(
+                                        ${book.id}, 
+                                        '${book.name}', 
+                                        '${book.author}', 
+                                        '${book.release_date}', 
+                                        ${book.return_type}, 
+                                        '${book.img}'
+                                        )">Edit
+                                    </button>
+                                    <button class="btn ${
+                                        book.is_available
+                                            ? 'btn-danger'
+                                            : 'btn-success'
+                                    }" 
+                                    onclick="showDeleteModal(
+                                        ${book.id}, 
+                                        ${book.is_available}
+                                    )">
+                                    ${book.is_available ? 'Delete' : 'Restore'}
+                                    </button>`
+                                }
                             </div>
                         </div>
                     </div>
-                `
-            }
-        `
+                </div>
+            `
+        }
+    `
         )
         .join('');
 };
@@ -267,15 +262,21 @@ const toggleBookAvailability = async () => {
         );
 
         if (response.status === 200) {
-            message.innerHTML = `<div class="alert alert-success">Book ${
-                currentBookIsAvailable ? 'deleted' : 'restored'
-            } successfully</div>`;
+            showMessage(
+                `Book ${
+                    currentBookIsAvailable ? 'deleted' : 'restored'
+                } successfully`,
+                'success'
+            );
             $('#deleteBookModal').modal('hide');
             fetchBooks();
         } else {
-            message.innerHTML = `<div class="alert alert-danger">Failed to ${
-                currentBookIsAvailable ? 'delete' : 'restore'
-            } book</div>`;
+            showMessage(
+                `Failed to ${
+                    currentBookIsAvailable ? 'delete' : 'restore'
+                } book`,
+                'danger'
+            );
         }
     } catch (error) {
         console.error(
@@ -285,7 +286,7 @@ const toggleBookAvailability = async () => {
         const errorMessage =
             error.response?.data?.message ||
             `Failed to ${currentBookIsAvailable ? 'delete' : 'restore'} book`;
-        message.innerHTML = `<div class="alert alert-danger">${errorMessage}</div>`;
+        showMessage(errorMessage, 'danger');
     }
 };
 
