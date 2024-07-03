@@ -3,6 +3,7 @@ from flask_jwt_extended import JWTManager
 from flask_cors import CORS
 from flask_migrate import Migrate
 from config.config import Config
+from config.utils import ensure_upload_folder_exists
 from models import db  # Import the single instance of db
 from config.default_user import create_default_admin
 
@@ -17,6 +18,10 @@ def create_app():
     db.init_app(app)
     jwt.init_app(app)
     migrate.init_app(app, db)
+
+    # Ensure the upload folder exists
+    ensure_upload_folder_exists(app.config['UPLOAD_FOLDER'])
+    
 
     with app.app_context():
         from routes.auth_routes import auth_bp

@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let user = null;
     let role = null;
 
+    // get user ditails and make sure it will keep the role on refresh
     const fetchCurrentUser = async () => {
         if (token) {
             try {
