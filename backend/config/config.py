@@ -8,3 +8,4 @@ class Config:
     JWT_SECRET_KEY = 'your-jwt-secret-key'
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(days=3)
     UPLOAD_FOLDER = os.path.join(os.getcwd(), 'assets/images')
+    

@@ -38,6 +38,7 @@ def create_app():
         db.create_all()
         create_default_admin()
 
+
     return app
 
 if __name__ == '__main__':
