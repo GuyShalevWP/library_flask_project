@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const SERVER = 'http://localhost:7000';
     const token = localStorage.getItem('token');
     const user = sessionStorage.getItem('user');
-    const role = user ? user.role : null;
+    const role = user ? JSON.parse(user).role : null;
 
     // Check if the token exists, if not redirect to sign-in
     if (!token && role !== 'admin') {
@@ -15,7 +15,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const roleFilter = document.getElementById('roleFilter');
     const activeFilter = document.getElementById('activeFilter');
     const customersTable = document.getElementById('customersTable');
-    const editUserForm = document.getElementById('editUserForm');
     let currentUserId = null;
     let currentUserActiveStatus = null;
 
@@ -86,13 +85,9 @@ document.addEventListener('DOMContentLoaded', () => {
                                 customer.is_active ? 'Active' : 'Inactive'
                             }</td>
                             <td>
-                                <button class="btn btn-primary" onclick="showEditModal(${
-                                    customer.id
-                                }, '${customer.first_name}', '${
-                                customer.last_name
-                            }', '${customer.phone}', ${
-                                customer.is_active
-                            })">Edit</button>
+                                <button class="btn btn-primary btn-sm" onclick='showEditModal(${JSON.stringify(
+                                    customer
+                                )})'>Edit</button>
                             </td>
                         </tr>
                     `
@@ -103,17 +98,19 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
     };
 
-    window.showEditModal = (id, firstName, lastName, phone, isActive) => {
-        currentUserId = id;
-        currentUserActiveStatus = isActive;
-        document.getElementById('editUserId').value = id;
-        document.getElementById('editFirstName').value = firstName;
-        document.getElementById('editLastName').value = lastName;
-        document.getElementById('editPhone').value = phone;
-        document.getElementById('toggleActiveButton').innerText = isActive
-            ? 'Deactivate'
-            : 'Activate';
-        $('#editUserModal').modal('show');
+    window.showEditModal = (customer) => {
+        currentUserId = customer.id;
+        currentUserActiveStatus = customer.is_active;
+        document.getElementById('editUserId').value = customer.id;
+        document.getElementById('editFirstName').value = customer.first_name;
+        document.getElementById('editLastName').value = customer.last_name;
+        document.getElementById('editPhone').value = customer.phone;
+        document.getElementById('toggleActiveButton').innerText =
+            customer.is_active ? 'Deactivate' : 'Activate';
+        const editUserModal = new bootstrap.Modal(
+            document.getElementById('editUserModal')
+        );
+        editUserModal.show();
     };
 
     const toggleUserActive = async () => {
@@ -127,7 +124,10 @@ document.addEventListener('DOMContentLoaded', () => {
             );
 
             if (response.status === 200) {
-                $('#editUserModal').modal('hide');
+                const editUserModal = bootstrap.Modal.getInstance(
+                    document.getElementById('editUserModal')
+                );
+                editUserModal.hide();
                 fetchCustomers();
             } else {
                 console.error('Failed to update user status');
@@ -139,8 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.toggleUserActive = toggleUserActive;
 
-    editUserForm.addEventListener('submit', async (event) => {
-        event.preventDefault();
+    const updateUser = async () => {
         const id = document.getElementById('editUserId').value;
         const firstName = document.getElementById('editFirstName').value;
         const lastName = document.getElementById('editLastName').value;
@@ -160,7 +159,10 @@ document.addEventListener('DOMContentLoaded', () => {
             );
 
             if (response.status === 200) {
-                $('#editUserModal').modal('hide');
+                const editUserModal = bootstrap.Modal.getInstance(
+                    document.getElementById('editUserModal')
+                );
+                editUserModal.hide();
                 fetchCustomers();
             } else {
                 console.error('Failed to update user');
@@ -168,7 +170,9 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.error('Error updating user:', error);
         }
-    });
+    };
+
+    window.updateUser = updateUser;
 
     searchInput.addEventListener('input', fetchCustomers);
     searchCriteria.addEventListener('change', fetchCustomers);
