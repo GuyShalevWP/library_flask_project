@@ -3,7 +3,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const token = localStorage.getItem('token');
     const role = localStorage.getItem('role');
     let currentBorrowId = null;
-    let borrowedBooks = [];
 
     // Check if the token exists, if not redirect to sign-in
     if (!token) {

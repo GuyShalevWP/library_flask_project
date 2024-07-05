@@ -58,7 +58,7 @@ def get_all_users():
     return jsonify(users_data), 200
 
 # Endpoint get user info
-@user_bp.route('/profile', methods=['GET'])
+@user_bp.route('/profile', methods=['GET', 'PUT'])
 @jwt_required()
 def get_profile():
     current_user_id = get_jwt_identity()

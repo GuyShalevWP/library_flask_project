@@ -11,64 +11,69 @@
     </head>
     <body>
         <nav class="navbar navbar-expand-lg navbar-light bg-light">
-            <a class="navbar-brand" href="../../index.html">Library</a>
-            <button
-                class="navbar-toggler"
-                type="button"
-                data-toggle="collapse"
-                data-target="#navbarNav"
-                aria-controls="navbarNav"
-                aria-expanded="false"
-                aria-label="Toggle navigation"
-            >
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav mr-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="../../index.html">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="../books/books.html">Books</a>
-                    </li>
-
-                    <li
-                        class="nav-item"
-                        id="borrowedBooksLink"
-                        style="display: none"
-                    >
-                        <a
-                            class="nav-link"
-                            href="../borrowed_books/borrowed_books.html"
-                            >Borrowed Books</a
+            <div class="container-fluid">
+                <a class="navbar-brand" href="../../index.html">Library</a>
+                <button
+                    class="navbar-toggler"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#navbarNav"
+                    aria-controls="navbarNav"
+                    aria-expanded="false"
+                    aria-label="Toggle navigation"
+                >
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link" href="../../index.html">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../books/books.html"
+                                >Books</a
+                            >
+                        </li>
+                        <li
+                            class="nav-item"
+                            id="borrowedBooksLink"
+                            style="display: none"
                         >
-                    </li>
-                    <li
-                        class="nav-item"
-                        id="customersLink"
-                        style="display: none"
-                    >
-                        <a class="nav-link" href="../customers/customers.html"
-                            >Customers</a
+                            <a
+                                class="nav-link"
+                                href="../borrowed_books/borrowed_books.html"
+                                >Borrowed Books</a
+                            >
+                        </li>
+                        <li
+                            class="nav-item"
+                            id="customersLink"
+                            style="display: none"
                         >
-                    </li>
-                </ul>
-                <ul class="navbar-nav ml-auto" id="authLinks">
-                    <li class="nav-item">
-                        <a
-                            class="nav-link"
-                            href="../signin_register/signin.html"
-                            >Sign In</a
-                        >
-                    </li>
-                    <li class="nav-item">
-                        <a
-                            class="nav-link"
-                            href="../signin_register/register.html"
-                            >Register</a
-                        >
-                    </li>
-                </ul>
+                            <a
+                                class="nav-link"
+                                href="../customers/customers.html"
+                                >Customers</a
+                            >
+                        </li>
+                    </ul>
+                    <ul class="navbar-nav ms-auto mb-2 mb-lg-0" id="authLinks">
+                        <li class="nav-item">
+                            <a
+                                class="nav-link"
+                                href="../signin_register/signin.html"
+                                >Sign In</a
+                            >
+                        </li>
+                        <li class="nav-item">
+                            <a
+                                class="nav-link"
+                                href="../signin_register/register.html"
+                                >Register</a
+                            >
+                        </li>
+                    </ul>
+                </div>
             </div>
         </nav>
 
@@ -80,13 +85,11 @@
             <div class="row mb-3 mt-3">
                 <div class="col-md-8">
                     <div class="input-group">
-                        <div class="input-group-prepend">
-                            <label class="input-group-text" for="searchCriteria"
-                                >Search by</label
-                            >
-                        </div>
+                        <label class="input-group-text" for="searchCriteria"
+                            >Search by</label
+                        >
                         <select
-                            class="form-control col-md-3"
+                            class="form-select col-md-3"
                             id="searchCriteria"
                         >
                             <option value="all">All</option>
@@ -103,12 +106,10 @@
                 </div>
                 <div class="col-md-4">
                     <div class="input-group">
-                        <div class="input-group-prepend">
-                            <label class="input-group-text" for="returnFilter"
-                                >Filter by</label
-                            >
-                        </div>
-                        <select class="form-control" id="returnFilter">
+                        <label class="input-group-text" for="returnFilter"
+                            >Filter by</label
+                        >
+                        <select class="form-select" id="returnFilter">
                             <option value="">All</option>
                             <option value="returned">Returned</option>
                             <option value="not_returned">Not Returned</option>
@@ -136,12 +137,10 @@
                         </h5>
                         <button
                             type="button"
-                            class="close"
-                            data-dismiss="modal"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
                             aria-label="Close"
-                        >
-                            <span aria-hidden="true">&times;</span>
-                        </button>
+                        ></button>
                     </div>
                     <div class="modal-body">
                         Are you sure you want to return this book?
@@ -150,7 +149,7 @@
                         <button
                             type="button"
                             class="btn btn-secondary"
-                            data-dismiss="modal"
+                            data-bs-dismiss="modal"
                         >
                             Cancel
                         </button>
@@ -182,56 +181,49 @@
                         </h5>
                         <button
                             type="button"
-                            class="close"
-                            data-dismiss="modal"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
                             aria-label="Close"
-                        >
-                            <span aria-hidden="true">&times;</span>
-                        </button>
+                        ></button>
                     </div>
                     <div class="modal-body">
                         <form id="changePasswordForm">
-                            <div class="form-group">
-                                <div class="form-group">
-                                    <input
-                                        type="text"
-                                        class="form-control"
-                                        id="hiddenUsername"
-                                        name="hiddenUsername"
-                                        autocomplete="username"
-                                        value="your-username-value"
-                                        style="display: none"
-                                    />
-                                </div>
-                                <label for="oldPassword">Old Password</label>
+                            <input
+                                type="text"
+                                id="hiddenUsername"
+                                name="username"
+                                autocomplete="username"
+                                value="your-username-value"
+                                style="display: none"
+                            />
+                            <div class="mb-3">
                                 <input
                                     type="password"
                                     class="form-control"
                                     id="oldPassword"
                                     required
                                     autocomplete="current-password"
+                                    placeholder="Old Password"
                                 />
                             </div>
-                            <div class="form-group">
-                                <label for="newPassword">New Password</label>
+                            <div class="mb-3">
                                 <input
                                     type="password"
                                     class="form-control"
                                     id="newPassword"
                                     required
                                     autocomplete="new-password"
+                                    placeholder="New Password"
                                 />
                             </div>
-                            <div class="form-group">
-                                <label for="confirmNewPassword"
-                                    >Confirm New Password</label
-                                >
+                            <div class="mb-3">
                                 <input
                                     type="password"
                                     class="form-control"
                                     id="confirmNewPassword"
                                     required
                                     autocomplete="new-password"
+                                    placeholder="Confirm New Password"
                                 />
                             </div>
                             <button
@@ -263,53 +255,51 @@
                         </h5>
                         <button
                             type="button"
-                            class="close"
-                            data-dismiss="modal"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
                             aria-label="Close"
-                        >
-                            <span aria-hidden="true">&times;</span>
-                        </button>
+                        ></button>
                     </div>
                     <div class="modal-body">
                         <form id="updateProfileForm">
-                            <div class="form-group">
-                                <label for="updateEmail">Email</label>
+                            <div class="mb-3">
                                 <input
                                     type="email"
                                     class="form-control"
                                     id="updateEmail"
                                     required
                                     autocomplete="email"
+                                    placeholder="Email"
                                 />
                             </div>
-                            <div class="form-group">
-                                <label for="updateFirstName">First Name</label>
+                            <div class="mb-3">
                                 <input
                                     type="text"
                                     class="form-control"
                                     id="updateFirstName"
                                     required
                                     autocomplete="given-name"
+                                    placeholder="First Name"
                                 />
                             </div>
-                            <div class="form-group">
-                                <label for="updateLastName">Last Name</label>
+                            <div class="mb-3">
                                 <input
                                     type="text"
                                     class="form-control"
                                     id="updateLastName"
                                     required
                                     autocomplete="family-name"
+                                    placeholder="Last Name"
                                 />
                             </div>
-                            <div class="form-group">
-                                <label for="updatePhone">Phone</label>
+                            <div class="mb-3">
                                 <input
                                     type="tel"
                                     class="form-control"
                                     id="updatePhone"
                                     required
                                     autocomplete="tel"
+                                    placeholder="Phone"
                                 />
                             </div>
                             <button

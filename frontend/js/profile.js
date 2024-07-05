@@ -46,12 +46,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     <p class="card-text"><strong>First Name:</strong> ${profile.first_name}</p>
                     <p class="card-text"><strong>Last Name:</strong> ${profile.last_name}</p>
                     <p class="card-text"><strong>Phone:</strong> ${profile.phone}</p>
-                    <button class="btn btn-primary" id="changePasswordButton">
-                        Change Password
-                    </button>
-                    <button class="btn btn-secondary" id="editProfileButton">
-                        Edit Profile
-                    </button>
+                    <button class="btn btn-primary" id="changePasswordButton">Change Password</button>
+                    <button class="btn btn-secondary" id="editProfileButton">Edit Profile</button>
                 </div>
             </div>
         `;
@@ -60,13 +56,19 @@ document.addEventListener('DOMContentLoaded', () => {
         document
             .getElementById('changePasswordButton')
             .addEventListener('click', () => {
-                $('#changePasswordModal').modal('show');
+                const changePasswordModal = new bootstrap.Modal(
+                    document.getElementById('changePasswordModal')
+                );
+                changePasswordModal.show();
             });
 
         document
             .getElementById('editProfileButton')
             .addEventListener('click', () => {
-                $('#updateProfileModal').modal('show');
+                const updateProfileModal = new bootstrap.Modal(
+                    document.getElementById('updateProfileModal')
+                );
+                updateProfileModal.show();
                 document.getElementById('updateEmail').value = profile.email;
                 document.getElementById('updateFirstName').value =
                     profile.first_name;
@@ -159,7 +161,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.showConfirmReturnModal = (borrowId) => {
         currentBorrowId = borrowId;
-        $('#confirmReturnModal').modal('show');
+        const confirmReturnModal = new bootstrap.Modal(
+            document.getElementById('confirmReturnModal')
+        );
+        confirmReturnModal.show();
     };
 
     const confirmReturnBook = async () => {
@@ -174,7 +179,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 );
 
                 if (response.status === 200) {
-                    $('#confirmReturnModal').modal('hide');
+                    const confirmReturnModal = bootstrap.Modal.getInstance(
+                        document.getElementById('confirmReturnModal')
+                    );
+                    confirmReturnModal.hide();
                     alert('Book returned successfully');
                     fetchBorrowedBooks(); // Refresh the table after returning the book
                 } else {
@@ -212,7 +220,10 @@ document.addEventListener('DOMContentLoaded', () => {
             );
 
             if (response.status === 200) {
-                $('#changePasswordModal').modal('hide');
+                const changePasswordModal = bootstrap.Modal.getInstance(
+                    document.getElementById('changePasswordModal')
+                );
+                changePasswordModal.hide();
                 alert('Password changed successfully');
             } else {
                 alert('Failed to change password');
@@ -245,7 +256,10 @@ document.addEventListener('DOMContentLoaded', () => {
             );
 
             if (response.status === 200) {
-                $('#updateProfileModal').modal('hide');
+                const updateProfileModal = bootstrap.Modal.getInstance(
+                    document.getElementById('updateProfileModal')
+                );
+                updateProfileModal.hide();
                 alert('Profile updated successfully');
                 fetchProfile(); // Refresh the profile details
             } else {
@@ -260,15 +274,12 @@ document.addEventListener('DOMContentLoaded', () => {
     document
         .getElementById('changePasswordForm')
         .addEventListener('submit', changePassword);
-
     document
         .getElementById('updateProfileForm')
         .addEventListener('submit', updateProfile);
-
     document
         .getElementById('confirmReturnButton')
         .addEventListener('click', confirmReturnBook);
-
     document
         .getElementById('searchInput')
         .addEventListener('input', fetchBorrowedBooks);
