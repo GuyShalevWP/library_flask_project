@@ -5,7 +5,6 @@ from models import db
 from PIL import Image
 import os
 
-def_book_bp = Blueprint('def_book_bp', __name__)
 
 # Function to create default books
 def create_default_books():
@@ -89,8 +88,3 @@ def create_default_books():
             print(f"Default book '{book_data['name']}' already exists.")
 
     return jsonify({'message': 'Default books added successfully', 'books': [book.name for book in added_books]}), 201
-
-# Endpoint to add default books
-@def_book_bp.route('/add_default_books', methods=['POST'])
-def add_default_books():
-    return create_default_books()

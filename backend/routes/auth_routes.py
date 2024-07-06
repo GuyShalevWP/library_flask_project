@@ -43,7 +43,7 @@ def register():
         return jsonify({'message': 'Phone number must be at least 9 digits long.'}), 400
 
     # Format phone number with dashes after every 3 digits
-    formatted_phone = '-'.join([phone[i:i+3] for i in range(0, len(phone), 3)])
+    formatted_phone = phone[:3] + '-' + phone[3:]
 
     new_user = User(email=email, first_name=first_name, last_name=last_name, phone=formatted_phone, role=role)
     new_user.set_password(password)

@@ -9,12 +9,15 @@ def create_default_admin():
     existing_user = User.query.filter_by(email=default_admin_email).first()
     
     if not existing_user:
+        phone ='1122334455'
+        formatted_phone = phone[:3] + '-' + phone[3:]
+
         default_admin = User(
             email=default_admin_email,
             password_hash=generate_password_hash("123@123"),
             first_name="Admin",
             last_name="Admin",
-            phone="1122334455",
+            phone=formatted_phone,
             role="admin",
             is_active=True
         )
@@ -28,8 +31,8 @@ def create_default_admin():
 def create_default_users():
     default_users = [
         {
-            "email": "user1@example.com",
-            "password": "password1@123",
+            "email": "test@test.com",
+            "password": "123@123",
             "first_name": "Alice",
             "last_name": "Johnson",
             "phone": "1112223333"
@@ -68,12 +71,14 @@ def create_default_users():
         existing_user = User.query.filter_by(email=user_data["email"]).first()
         
         if not existing_user:
+            formatted_phone =  user_data["phone"][:3] + '-' + user_data["phone"][3:]
+
             new_user = User(
                 email=user_data["email"],
                 password_hash=generate_password_hash(user_data["password"]),
                 first_name=user_data["first_name"],
                 last_name=user_data["last_name"],
-                phone=user_data["phone"],
+                phone=formatted_phone,
                 is_active=True
             )
             db.session.add(new_user)

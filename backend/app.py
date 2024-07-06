@@ -30,18 +30,18 @@ def create_app():
         from routes.user_routes import user_bp
         from routes.book_routes import book_bp
         from routes.borrow_routes import borrow_bp
-        from utils.default_books import def_book_bp
 
         app.register_blueprint(auth_bp)
         app.register_blueprint(user_bp)
         app.register_blueprint(book_bp)
         app.register_blueprint(borrow_bp)
-        app.register_blueprint(def_book_bp) # Route for creating default books
 
         db.create_all()
+
+        # Default set up
         create_default_admin()
         create_default_users()
-        create_default_books() # Creates default books
+        create_default_books()
         
 
 
