@@ -79,43 +79,12 @@ document.addEventListener('DOMContentLoaded', () => {
             });
     };
 
-    // checks the current date
-    const isDatePast = (estimatedReturnDate, returnDate) => {
-        const currentDate = new Date();
-        const formattedCurrentDate = new Date(
-            currentDate.getFullYear(),
-            currentDate.getMonth(),
-            currentDate.getDate()
-        );
-
-        const [estDay, estMonth, estYear] = estimatedReturnDate.split('-');
-        const estimatedReturn = new Date(estYear, estMonth - 1, estDay); // Month is 0-indexed in JS Date
-
-        // Check if the current date is past the estimated return date
-        const isCurrentDatePast = formattedCurrentDate > estimatedReturn;
-
-        let isReturnDatePast = false;
-        if (returnDate) {
-            const [retDay, retMonth, retYear] = returnDate.split('-');
-            const actualReturnDate = new Date(retYear, retMonth - 1, retDay); // Month is 0-indexed in JS Date
-
-            // Check if the return date is past the estimated return date
-            isReturnDatePast = actualReturnDate > estimatedReturn;
-        }
-
-        return isCurrentDatePast || isReturnDatePast;
-    };
-
     // Function to map books to table rows
     const mapBorrowedBooksToTableRows = (books) => {
         return books
             .map(
                 (book, index) => `
-            <tr class="${
-                isDatePast(book.estimated_return_date, book.return_date)
-                    ? 'table-danger'
-                    : ''
-            }">
+            <tr class="${book.late_retun ? 'table-danger' : ''}">
                 <td>${index + 1}</td>
                 <td>${book.book_name}</td>
                 <td>${book.author}</td>
@@ -147,44 +116,36 @@ document.addEventListener('DOMContentLoaded', () => {
         const returnFilter = document.getElementById('returnFilter').value;
 
         // Filter the books based on search input and return filter
-        let filteredBooks = borrowedBooks.filter((book) => {
-            let matchesSearch = true;
-            if (searchInput) {
-                if (searchCriteria === 'all') {
-                    matchesSearch =
-                        book.book_name.toLowerCase().includes(searchInput) ||
-                        book.author.toLowerCase().includes(searchInput);
-                } else if (searchCriteria === 'book_name') {
-                    matchesSearch = book.book_name
-                        .toLowerCase()
-                        .includes(searchInput);
-                } else if (searchCriteria === 'author') {
-                    matchesSearch = book.author
-                        .toLowerCase()
-                        .includes(searchInput);
+        let filteredBooks = borrowedBooks
+            .filter((book) => {
+                let matchesSearch = true;
+                if (searchInput) {
+                    if (searchCriteria === 'all') {
+                        matchesSearch =
+                            book.book_name
+                                .toLowerCase()
+                                .includes(searchInput) ||
+                            book.author.toLowerCase().includes(searchInput);
+                    } else if (searchCriteria === 'book_name') {
+                        matchesSearch = book.book_name
+                            .toLowerCase()
+                            .includes(searchInput);
+                    } else if (searchCriteria === 'author') {
+                        matchesSearch = book.author
+                            .toLowerCase()
+                            .includes(searchInput);
+                    }
                 }
-            }
 
-            const matchesFilter =
-                returnFilter === '' ||
-                (returnFilter === 'returned' && book.is_returned) ||
-                (returnFilter === 'not_returned' && !book.is_returned) ||
-                (returnFilter === 'late_return' &&
-                    isDatePast(book.estimated_return_date, book.return_date));
+                const matchesFilter =
+                    returnFilter === '' ||
+                    (returnFilter === 'returned' && book.is_returned) ||
+                    (returnFilter === 'not_returned' && !book.is_returned) ||
+                    (returnFilter === 'late_return' && book.late_retun);
 
-            return matchesSearch && matchesFilter;
-        });
-
-        // Sort the books: late returns first, then by most recent
-        filteredBooks.sort((a, b) => {
-            const isLateA = isDatePast(a.estimated_return_date, a.return_date);
-            const isLateB = isDatePast(b.estimated_return_date, b.return_date);
-
-            if (isLateA && !isLateB) return -1;
-            if (!isLateA && isLateB) return 1;
-
-            return b.id - a.id;
-        });
+                return matchesSearch && matchesFilter;
+            })
+            .reverse();
 
         // Map the sorted books to table rows and render the table
         const tableRows = mapBorrowedBooksToTableRows(filteredBooks);

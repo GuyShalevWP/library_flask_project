@@ -4,12 +4,7 @@
 
 ### Backend
 
--   fix update in profile
-
 ### Frontend
-
--   implement CRUD with REST API borrowed books in profile
--   fix update in profile
 
 ## Project Overview
 

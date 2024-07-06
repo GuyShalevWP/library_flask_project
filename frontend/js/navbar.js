@@ -63,10 +63,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
 
-            if (role === 'admin') {
-                if (customersLink) customersLink.style.display = 'block';
+            if (token && role === 'user') {
                 if (borrowedBooksLink)
                     borrowedBooksLink.style.display = 'block';
+            }
+            if (token && role === 'admin') {
+                if (customersLink) customersLink.style.display = 'block';
             }
         }
     };

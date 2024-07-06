@@ -24,6 +24,41 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    const mapBorrowedBooksToTableRows = (books) => {
+        return books
+            .map(
+                (book, index) => `
+            <tr class="${book.late_return ? 'table-danger' : ''}">
+                <td>${index + 1}</td>
+                <td>${book.user_email}</td>
+                <td>${book.first_name} ${book.last_name}</td>
+                <td>${book.book_name}</td>
+                <td>${book.borrow_date}</td>
+                <td class="text-truncate">${
+                    book.return_date || book.estimated_return_date
+                }</td>
+                <td>
+                    <button class="btn btn-primary btn-sm" onclick='showDetailsModal(${JSON.stringify(
+                        book
+                    )})'>
+                        Show
+                    </button>
+                </td>
+                <td class="d-flex justify-content-center align-items-center">
+                    <button class="btn ${
+                        book.is_returned ? 'btn-secondary' : 'btn-primary'
+                    } btn-sm" ${
+                    book.is_returned ? 'disabled' : ''
+                } onclick="showConfirmReturnModal(${book.id})">
+                        ${book.is_returned ? 'Returned' : 'Return'}
+                    </button>
+                </td>
+            </tr>
+        `
+            )
+            .join('');
+    };
+
     const renderBorrowedBooksTable = (borrowedBooks) => {
         const searchInput = document
             .getElementById('searchInput')
@@ -31,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const searchCriteria = document.getElementById('searchCriteria').value;
         const returnFilter = document.getElementById('returnFilter').value;
 
-        const filteredBooks = borrowedBooks
+        let filteredBooks = borrowedBooks
             .filter((book) => {
                 let matchesSearch = true;
                 if (searchInput) {
@@ -62,83 +97,36 @@ document.addEventListener('DOMContentLoaded', () => {
                 const matchesFilter =
                     returnFilter === '' ||
                     (returnFilter === 'returned' && book.is_returned) ||
-                    (returnFilter === 'not_returned' && !book.is_returned);
+                    (returnFilter === 'not_returned' && !book.is_returned) ||
+                    (returnFilter === 'late_return' && book.late_return);
 
                 return matchesSearch && matchesFilter;
             })
-            .reverse(); // Reversing the filtered array to show most recent first
+            .reverse();
 
+        // Map the sorted books to table rows and render the table
+        const tableRows = mapBorrowedBooksToTableRows(filteredBooks);
         const table = `
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>No.</th>
-                        <th>Email</th>
-                        <th class="text-truncate">Full Name</th>
-                        <th class="text-truncate">Book Name</th>
-                        <th class="text-truncate">Borrow Date</th>
-                        <th class="text-truncate">Return Date</th>
-                        <th>Details</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${filteredBooks
-                        .map(
-                            (book, index) => `
-                            <tr class="${
-                                !book.late_return ? '' : 'table-danger'
-                            }">
-                                <td>${index + 1}</td>
-                                <td class="text-truncate">${
-                                    book.user_email
-                                }</td>
-                                <td class="text-truncate">${book.first_name} ${
-                                book.last_name
-                            }</td>
-                                <td class="text-truncate">${book.book_name}</td>
-                                <td class="text-truncate">${
-                                    book.borrow_date
-                                }</td>
-                                <td class="text-truncate">${
-                                    !book.return_date
-                                        ? book.estimated_return_date
-                                        : book.return_date
-                                }</td>
-                                <td>
-                                    <button class="btn btn-primary btn-sm" onclick='showDetailsModal(${JSON.stringify(
-                                        book
-                                    )})'>
-                                        Show
-                                    </button>
-                                </td>                      
-                                <td class="d-flex justify-content-center align-items-center">
-                                    <button class="btn ${
-                                        !book.is_returned
-                                            ? 'btn-primary'
-                                            : 'btn-secondary'
-                                    } btn-sm" ${
-                                !book.is_returned ? '' : 'disabled'
-                            } onclick="showConfirmReturnModal(${book.id})">
-                                    ${!book.is_returned ? 'Return' : 'Returned'}
-                                </button>
-                                </td>
-                            </tr>
-                        `
-                        )
-                        .join('')}
-                </tbody>
-            </table>
-        `;
+        <h3>Borrowed Books</h3>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>No.</th>
+                    <th>Email</th>
+                    <th>Full Name</th>
+                    <th>Book Name</th>
+                    <th>Borrow Date</th>
+                    <th>Return Date</th>
+                    <th>Details</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${tableRows}
+            </tbody>
+        </table>
+    `;
         document.getElementById('borrowedBooksTable').innerHTML = table;
-    };
-
-    window.showConfirmReturnModal = (borrowId) => {
-        currentBorrowId = borrowId;
-        const confirmReturnModal = new bootstrap.Modal(
-            document.getElementById('confirmReturnModal')
-        );
-        confirmReturnModal.show();
     };
 
     window.showDetailsModal = (book) => {
@@ -161,35 +149,41 @@ document.addEventListener('DOMContentLoaded', () => {
         detailsModal.show();
     };
 
-    document
-        .getElementById('confirmReturnButton')
-        .addEventListener('click', async () => {
-            if (currentBorrowId) {
-                try {
-                    const response = await axios.put(
-                        `${SERVER}/return_book/${currentBorrowId}`,
-                        {},
-                        {
-                            headers: { Authorization: `Bearer ${token}` },
-                        }
-                    );
+    window.showConfirmReturnModal = (borrowId) => {
+        currentBorrowId = borrowId;
+        const confirmReturnModal = new bootstrap.Modal(
+            document.getElementById('confirmReturnModal')
+        );
+        confirmReturnModal.show();
+    };
 
-                    if (response.status === 200) {
-                        const confirmReturnModal = bootstrap.Modal.getInstance(
-                            document.getElementById('confirmReturnModal')
-                        );
-                        confirmReturnModal.hide();
-                        alert('Book returned successfully');
-                        fetchBorrowedBooks(); // Refresh the table after returning the book
-                    } else {
-                        alert('Failed to return book');
+    const confirmReturnBook = async () => {
+        if (currentBorrowId) {
+            try {
+                const response = await axios.put(
+                    `${SERVER}/return_book/${currentBorrowId}`,
+                    {},
+                    {
+                        headers: { Authorization: `Bearer ${token}` },
                     }
-                } catch (error) {
-                    console.error('Error returning book:', error);
-                    alert('Error returning book');
+                );
+
+                if (response.status === 200) {
+                    const confirmReturnModal = bootstrap.Modal.getInstance(
+                        document.getElementById('confirmReturnModal')
+                    );
+                    confirmReturnModal.hide();
+                    alert('Book returned successfully');
+                    fetchBorrowedBooks(); // Refresh the table after returning the book
+                } else {
+                    alert('Failed to return book');
                 }
+            } catch (error) {
+                console.error('Error returning book:', error);
+                alert('Error returning book');
             }
-        });
+        }
+    };
 
     document
         .getElementById('searchInput')

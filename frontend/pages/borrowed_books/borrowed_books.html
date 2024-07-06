@@ -102,6 +102,7 @@
                         <option value="">All</option>
                         <option value="returned">Returned</option>
                         <option value="not_returned">Not Returned</option>
+                        <option value="late_return">Late Return</option>
                     </select>
                 </div>
             </div>
@@ -213,6 +214,7 @@
                             type="button"
                             class="btn btn-primary"
                             id="confirmReturnButton"
+                            onclick="confirmReturnBook()"
                         >
                             Return Book
                         </button>

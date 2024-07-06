@@ -71,8 +71,19 @@ def get_all_borrowed_books():
         return jsonify({'message': 'Unauthorized to view borrowed books'}), 403
 
     borrowed_books = BorrowedBook.query.all()
-    borrowed_books_data = [
-        {
+    current_date = datetime.utcnow().strftime('%d-%m-%Y')
+    current_date = datetime.strptime(current_date, '%d-%m-%Y')
+    borrowed_books_data = []
+
+    for borrowed_book in borrowed_books:
+        # Check if current date is past the estimated return date
+        if borrowed_book.estimated_return_date:
+            estimated_return_date = datetime.strptime(borrowed_book.estimated_return_date, '%d-%m-%Y')
+            if current_date > estimated_return_date and not borrowed_book.return_date:
+                borrowed_book.late_return = True
+                db.session.commit()  # Commit the change to the database
+
+        borrowed_books_data.append({
             'id': borrowed_book.id,
             'user_email': borrowed_book.user.email,
             'first_name': borrowed_book.user.first_name,
@@ -86,9 +97,8 @@ def get_all_borrowed_books():
             'estimated_return_date': borrowed_book.estimated_return_date,
             'return_date': borrowed_book.return_date,
             'late_return': borrowed_book.late_return,
-        }
-        for borrowed_book in borrowed_books
-    ]
+        })
+
     return jsonify(borrowed_books_data), 200
 
 # Endpoint for user borrowed books
@@ -101,8 +111,19 @@ def get_user_borrowed_books():
     if not current_user_id:
         return jsonify({'message': 'Unauthorized to view borrowed books'}), 403
     
-    borrowed_books_data = [
-        {
+    current_date = datetime.utcnow().strftime('%d-%m-%Y')
+    current_date = datetime.strptime(current_date, '%d-%m-%Y')
+    borrowed_books_data = []
+
+    for borrowed_book in borrowed_books:
+        # Check if current date is past the estimated return date
+        if borrowed_book.estimated_return_date:
+            estimated_return_date = datetime.strptime(borrowed_book.estimated_return_date, '%d-%m-%Y')
+            if current_date > estimated_return_date and not borrowed_book.return_date:
+                borrowed_book.late_return = True
+                db.session.commit()  # Commit the change to the database
+
+        borrowed_books_data.append({
             'id': borrowed_book.id,
             'user_email': borrowed_book.user.email,
             'first_name': borrowed_book.user.first_name,
@@ -116,9 +137,8 @@ def get_user_borrowed_books():
             'estimated_return_date': borrowed_book.estimated_return_date,
             'return_date': borrowed_book.return_date,
             'late_return': borrowed_book.late_return,
-        }
-        for borrowed_book in borrowed_books
-    ]
+        })
+
     return jsonify(borrowed_books_data), 200
 
 # Endpoint return book
@@ -138,15 +158,7 @@ def return_book(borrow_id):
     book = db.session.get(Books, borrowed_book.book_id)
     book.is_borrowed = False
     borrowed_book.is_returned = True
-
-    current_date = datetime.utcnow().strftime('%d-%m-%Y')
-    current_date = datetime.strptime(current_date, '%d-%m-%Y')
-    check_return_date = datetime.strptime(borrowed_book.estimated_return_date, '%d-%m-%Y')
-
-    if current_date > check_return_date:
-        borrowed_book.late_return = True
-
-    borrowed_book.return_date = current_date.strftime('%d-%m-%Y')  # Set return_date to current date
+    borrowed_book.return_date = datetime.utcnow().strftime('%d-%m-%Y')  # Set return_date to current date
 
     db.session.commit()
     return jsonify({'message': 'Book returned successfully'}), 200
