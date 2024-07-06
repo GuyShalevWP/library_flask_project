@@ -4,6 +4,10 @@ document.addEventListener('DOMContentLoaded', () => {
     let user = null;
     let role = null;
 
+    const authLinks = document.getElementById('authLinks');
+    const customersLink = document.getElementById('customersLink');
+    const borrowedBooksLink = document.getElementById('borrowedBooksLink');
+
     // Fetch current user details and store role on refresh
     const fetchCurrentUser = async () => {
         if (token) {
@@ -16,7 +20,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     user = response.data;
                     role = user.role;
 
-                    // Store user information and role in localStorage
                     localStorage.setItem('user', JSON.stringify(user));
                     localStorage.setItem('role', role);
 
@@ -29,10 +32,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     };
-
-    const authLinks = document.getElementById('authLinks');
-    const customersLink = document.getElementById('customersLink');
-    const borrowedBooksLink = document.getElementById('borrowedBooksLink');
 
     // Check if the user is authenticated and update the navbar
     const updateNavbar = () => {
