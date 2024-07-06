@@ -8,6 +8,18 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
+    const fetchBorrowedBooks = async () => {
+        try {
+            const response = await axios.get(`${SERVER}/my_borrowed_books`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            const books = response.data;
+            renderBorrowedBooks(books);
+        } catch (error) {
+            console.error('Error fetching borrowed books:', error);
+        }
+    };
+
     const fetchProfile = async () => {
         try {
             const response = await axios.get(`${SERVER}/profile`, {
@@ -23,17 +35,6 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById(
                 'message'
             ).innerHTML = `<div class="alert alert-danger">${errorMessage}</div>`;
-        }
-    };
-
-    const fetchBorrowedBooks = async () => {
-        try {
-            const response = await axios.get(`${SERVER}/my_borrowed_books`, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            renderBorrowedBooks(response.data);
-        } catch (error) {
-            console.error('Error fetching borrowed books:', error);
         }
     };
 
@@ -78,6 +79,66 @@ document.addEventListener('DOMContentLoaded', () => {
             });
     };
 
+    // checks the current date
+    const isDatePast = (estimatedReturnDate, returnDate) => {
+        const currentDate = new Date();
+        const formattedCurrentDate = new Date(
+            currentDate.getFullYear(),
+            currentDate.getMonth(),
+            currentDate.getDate()
+        );
+
+        const [estDay, estMonth, estYear] = estimatedReturnDate.split('-');
+        const estimatedReturn = new Date(estYear, estMonth - 1, estDay); // Month is 0-indexed in JS Date
+
+        // Check if the current date is past the estimated return date
+        const isCurrentDatePast = formattedCurrentDate > estimatedReturn;
+
+        let isReturnDatePast = false;
+        if (returnDate) {
+            const [retDay, retMonth, retYear] = returnDate.split('-');
+            const actualReturnDate = new Date(retYear, retMonth - 1, retDay); // Month is 0-indexed in JS Date
+
+            // Check if the return date is past the estimated return date
+            isReturnDatePast = actualReturnDate > estimatedReturn;
+        }
+
+        return isCurrentDatePast || isReturnDatePast;
+    };
+
+    // Function to map books to table rows
+    const mapBooksToTableRows = (books) => {
+        return books
+            .map(
+                (book, index) => `
+            <tr class="${
+                isDatePast(book.estimated_return_date, book.return_date)
+                    ? 'table-danger'
+                    : ''
+            }">
+                <td>${index + 1}</td>
+                <td>${book.book_name}</td>
+                <td>${book.author}</td>
+                <td>${book.borrow_date}</td>
+                <td class="text-truncate">${
+                    book.return_date || book.estimated_return_date
+                }</td>
+                <td>
+                    <button class="btn ${
+                        book.is_returned ? 'btn-secondary' : 'btn-primary'
+                    } btn-sm" ${
+                    book.is_returned ? 'disabled' : ''
+                } onclick="showConfirmReturnModal(${book.id})">
+                        ${book.is_returned ? 'Returned' : 'Return'}
+                    </button>
+                </td>
+            </tr>
+        `
+            )
+            .join('');
+    };
+
+    // Function to render borrowed books table
     const renderBorrowedBooks = (borrowedBooks) => {
         const searchInput = document
             .getElementById('searchInput')
@@ -85,7 +146,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const searchCriteria = document.getElementById('searchCriteria').value;
         const returnFilter = document.getElementById('returnFilter').value;
 
-        const filteredBooks = borrowedBooks.filter((book) => {
+        // Filter the books based on search input and return filter
+        let filteredBooks = borrowedBooks.filter((book) => {
             let matchesSearch = true;
             if (searchInput) {
                 if (searchCriteria === 'all') {
@@ -105,58 +167,66 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const matchesFilter =
                 returnFilter === '' ||
-                (returnFilter === 'returned' && book.return_type === 0) ||
-                (returnFilter === 'not_returned' && book.return_type !== 0);
+                (returnFilter === 'returned' && book.is_returned) ||
+                (returnFilter === 'not_returned' && !book.is_returned) ||
+                (returnFilter === 'late_return' &&
+                    isDatePast(book.estimated_return_date, book.return_date));
 
             return matchesSearch && matchesFilter;
         });
 
+        // Sort the books: late returns first, then by most recent
+        filteredBooks.sort((a, b) => {
+            const isLateA = isDatePast(a.estimated_return_date, a.return_date);
+            const isLateB = isDatePast(b.estimated_return_date, b.return_date);
+
+            if (isLateA && !isLateB) return -1;
+            if (!isLateA && isLateB) return 1;
+
+            return b.id - a.id;
+        });
+
+        // Map the sorted books to table rows and render the table
+        const tableRows = mapBooksToTableRows(filteredBooks);
         const table = `
-            <h3>Borrowed Books</h3>
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>Index</th>
-                        <th>Book Name</th>
-                        <th>Author</th>
-                        <th>Borrow Date</th>
-                        <th>Return Date</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${filteredBooks
-                        .map(
-                            (book, index) => `
-                            <tr>
-                                <td>${index + 1}</td>
-                                <td>${book.book_name}</td>
-                                <td>${book.author}</td>
-                                <td>${book.borrow_date}</td>
-                                <td>${book.return_date || 'Not Returned'}</td>
-                                <td>
-                                    <button class="btn ${
-                                        book.return_type === 0
-                                            ? 'btn-secondary'
-                                            : 'btn-primary'
-                                    } btn-sm" ${
-                                book.return_type === 0 ? 'disabled' : ''
-                            } onclick="showConfirmReturnModal(${book.id})">
-                                        ${
-                                            book.return_type === 0
-                                                ? 'Returned'
-                                                : 'Return'
-                                        }
-                                    </button>
-                                </td>
-                            </tr>
-                        `
-                        )
-                        .join('')}
-                </tbody>
-            </table>
-        `;
+        <h3>Borrowed Books</h3>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Index</th>
+                    <th>Book Name</th>
+                    <th>Author</th>
+                    <th>Borrow Date</th>
+                    <th>Return Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${tableRows}
+            </tbody>
+        </table>
+    `;
         document.getElementById('borrowedBooks').innerHTML = table;
+    };
+
+    window.showDetailsModal = (book) => {
+        document.getElementById('detailsBorrowId').innerText = book.id;
+        document.getElementById(
+            'detailsFullName'
+        ).innerText = `${book.first_name} ${book.last_name}`;
+        document.getElementById('detailsEmail').innerText = book.user_email;
+        document.getElementById('detailsBookId').innerText = book.book_id;
+        document.getElementById('detailsBookName').innerText = book.book_name;
+        document.getElementById('detailsAuthor').innerText = book.author;
+        document.getElementById('detailsBorrowDate').innerText =
+            book.borrow_date;
+        document.getElementById('detailsReturnDate').innerText =
+            book.return_date || book.estimated_return_date;
+
+        const detailsModal = new bootstrap.Modal(
+            document.getElementById('detailsModal')
+        );
+        detailsModal.show();
     };
 
     window.showConfirmReturnModal = (borrowId) => {
@@ -243,7 +313,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             const response = await axios.put(
-                `${SERVER}/user/profile`, // Endpoint to update profile
+                `${SERVER}/profile`, // Updated endpoint to update profile
                 {
                     email,
                     first_name: firstName,

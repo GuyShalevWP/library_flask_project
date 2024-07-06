@@ -15,7 +15,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (response.status === 200) {
                     user = response.data;
                     role = user.role;
-                    console.log('Current User:', user);
 
                     // Store user information and role in localStorage
                     localStorage.setItem('user', JSON.stringify(user));

@@ -97,17 +97,24 @@ def get_all_borrowed_books():
 def get_user_borrowed_books():
     current_user_id = get_jwt_identity()
     borrowed_books = BorrowedBook.query.filter_by(user_id=current_user_id).all()
+
+    if not current_user_id:
+        return jsonify({'message': 'Unauthorized to view borrowed books'}), 403
+    
     borrowed_books_data = [
         {
             'id': borrowed_book.id,
+            'user_email': borrowed_book.user.email,
+            'first_name': borrowed_book.user.first_name,
+            'last_name': borrowed_book.user.last_name,
             'book_id': borrowed_book.book_id,
-            'borrow_date': borrowed_book.borrow_date,
             'book_name': borrowed_book.book.name.title(),
             'author': borrowed_book.book.author.title(),
             'is_borrowed': borrowed_book.book.is_borrowed,
+            'borrow_date': borrowed_book.borrow_date,
+            'is_returned': borrowed_book.is_returned,
             'estimated_return_date': borrowed_book.estimated_return_date,
             'return_date': borrowed_book.return_date,
-            'is_returned': borrowed_book.is_returned,
             'late_return': borrowed_book.late_return,
         }
         for borrowed_book in borrowed_books

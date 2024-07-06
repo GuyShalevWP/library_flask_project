@@ -57,27 +57,58 @@ def get_all_users():
 
     return jsonify(users_data), 200
 
-# Endpoint get user info
+# Endpoint to get or update user profile
 @user_bp.route('/profile', methods=['GET', 'PUT'])
 @jwt_required()
-def get_profile():
+def get_or_update_profile():
     current_user_id = get_jwt_identity()
     current_user = db.session.get(User, current_user_id)
 
     if not current_user:
         return jsonify({'message': 'User not found'}), 404
 
-    user_data = {
-        'id': current_user.id,
-        'email': current_user.email,
-        'first_name': current_user.first_name,
-        'last_name': current_user.last_name,
-        'phone': current_user.phone,
-        'is_active': current_user.is_active,
-        'role': current_user.role
-    }
+    if request.method == 'GET':
+        user_data = {
+            'id': current_user.id,
+            'email': current_user.email,
+            'first_name': current_user.first_name,
+            'last_name': current_user.last_name,
+            'phone': current_user.phone,
+            'is_active': current_user.is_active,
+            'role': current_user.role
+        }
+        return jsonify(user_data), 200
 
-    return jsonify(user_data), 200
+    if request.method == 'PUT':
+        data = request.get_json()
+        new_email = data.get('email')
+        new_first_name = data.get('first_name')
+        new_last_name = data.get('last_name')
+        new_phone = data.get('phone')
+
+        if new_email:
+            # Validate email format
+            if not re.match(r"[^@]+@[^@]+\.[^@]+", new_email):
+                return jsonify({'message': 'Invalid email format. It must contain "@" and "."'}), 400
+
+            existing_user = User.query.filter_by(email=new_email).first()
+            if existing_user and existing_user.id != current_user_id:
+                return jsonify({'message': 'Email already registered'}), 409
+            current_user.email = new_email
+
+        if new_first_name:
+            current_user.first_name = new_first_name
+        if new_last_name:
+            current_user.last_name = new_last_name
+        if new_phone:
+            current_user.phone = new_phone
+
+        db.session.commit()
+
+        # Re-fetch the user to confirm the email update
+        updated_user = db.session.get(User, current_user_id)
+
+        return jsonify({'message': 'User information updated successfully', 'updated_email': updated_user.email}), 200
 
 
 # Endpoint get user details and edit it

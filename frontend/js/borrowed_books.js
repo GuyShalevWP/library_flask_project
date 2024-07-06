@@ -105,15 +105,13 @@ document.addEventListener('DOMContentLoaded', () => {
                                         ? book.estimated_return_date
                                         : book.return_date
                                 }</td>
-
                                 <td>
                                     <button class="btn btn-primary btn-sm" onclick='showDetailsModal(${JSON.stringify(
                                         book
                                     )})'>
                                         Show
                                     </button>
-                                </td>
-                                
+                                </td>                      
                                 <td class="d-flex justify-content-center align-items-center">
                                     <button class="btn ${
                                         !book.is_returned

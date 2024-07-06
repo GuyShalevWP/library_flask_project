@@ -113,12 +113,81 @@
                             <option value="">All</option>
                             <option value="returned">Returned</option>
                             <option value="not_returned">Not Returned</option>
+                            <option value="late_return">Late Return</option>
                         </select>
                     </div>
                 </div>
             </div>
 
             <div id="borrowedBooks" class="mt-3"></div>
+        </div>
+
+        <!-- Borrow Info Modal -->
+        <div
+            class="modal fade"
+            id="detailsModal"
+            tabindex="-1"
+            aria-labelledby="detailsModalLabel"
+            aria-hidden="true"
+        >
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="detailsModalLabel">
+                            Borrowed Book Details
+                        </h5>
+                        <button
+                            type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"
+                        ></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>
+                            <strong>Borrow ID:</strong>
+                            <span id="detailsBorrowId"></span>
+                        </p>
+                        <p>
+                            <strong>Full Name:</strong>
+                            <span id="detailsFullName"></span>
+                        </p>
+                        <p>
+                            <strong>Email:</strong>
+                            <span id="detailsEmail"></span>
+                        </p>
+                        <p>
+                            <strong>Book ID:</strong>
+                            <span id="detailsBookId"></span>
+                        </p>
+                        <p>
+                            <strong>Book Name:</strong>
+                            <span id="detailsBookName"></span>
+                        </p>
+                        <p>
+                            <strong>Author:</strong>
+                            <span id="detailsAuthor"></span>
+                        </p>
+                        <p>
+                            <strong>Borrow Date:</strong>
+                            <span id="detailsBorrowDate"></span>
+                        </p>
+                        <p>
+                            <strong>Return Date:</strong>
+                            <span id="detailsReturnDate"></span>
+                        </p>
+                    </div>
+                    <div class="modal-footer">
+                        <button
+                            type="button"
+                            class="btn btn-secondary"
+                            data-bs-dismiss="modal"
+                        >
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Confirmation Modal -->
