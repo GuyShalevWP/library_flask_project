@@ -107,7 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Function to map books to table rows
-    const mapBooksToTableRows = (books) => {
+    const mapBorrowedBooksToTableRows = (books) => {
         return books
             .map(
                 (book, index) => `
@@ -187,7 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // Map the sorted books to table rows and render the table
-        const tableRows = mapBooksToTableRows(filteredBooks);
+        const tableRows = mapBorrowedBooksToTableRows(filteredBooks);
         const table = `
         <h3>Borrowed Books</h3>
         <table class="table table-bordered">
