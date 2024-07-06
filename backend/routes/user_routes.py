@@ -239,6 +239,7 @@ def reset_password():
 
     user.set_password(new_password)
     user.password_needs_reset = False  # Clear the flag
+    user.is_active = True
     db.session.commit()
 
     return jsonify({'message': 'Password has been reset successfully'}), 200

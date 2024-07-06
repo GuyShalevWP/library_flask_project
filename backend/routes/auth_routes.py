@@ -47,12 +47,11 @@ def login():
 
     if user and user.check_password(data.get('password')):
         if not user.is_active:
-            return jsonify({'message': 'User account is deactivated. Please reset your password.'}), 403
+            return jsonify({'message': 'User account is deactivated. Please reset your password.', 'status': 'deactivated'}), 403
 
         if user.password_needs_reset:
-            return jsonify({'message': 'Password needs to be reset. Please reset your password.'}), 403
+            return jsonify({'message': 'Password needs to be reset. Please reset your password.', 'status': 'password_reset'}), 403
 
-        # Store only the user ID in the token
         access_token = create_access_token(identity=user.id)
         return jsonify({
             'message': 'Login successful',

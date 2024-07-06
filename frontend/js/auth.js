@@ -2,7 +2,7 @@ const SERVER = 'http://localhost:7000';
 
 const showMessage = (msg, type) => {
     const message = document.getElementById('messageModalBody');
-    message.innerHTML = `<div class="alert alert-success">${msg}</div>`;
+    message.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
     const messageModal = new bootstrap.Modal(
         document.getElementById('messageModal')
     );
@@ -46,8 +46,57 @@ const login = async () => {
         }
     } catch (error) {
         console.error('Error during login:', error);
+        if (error.response?.status === 403) {
+            const status = error.response?.data?.status;
+            const msg = error.response?.data?.message;
+
+            if (status === 'deactivated' || status === 'password_reset') {
+                showMessage(msg, 'warning');
+                setTimeout(() => {
+                    window.location.href =
+                        '../signin_register/reset_password.html';
+                }, 2000);
+            }
+        } else {
+            const errorMessage =
+                error.response?.data?.message || 'Invalid email or password';
+            showError(errorMessage);
+        }
+    }
+};
+
+const resetPassword = async () => {
+    const email = document.getElementById('resetEmail').value;
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmNewPassword =
+        document.getElementById('confirmNewPassword').value;
+
+    if (!email || !newPassword || !confirmNewPassword) {
+        showError('Please fill all the fields');
+        return;
+    }
+
+    if (newPassword !== confirmNewPassword) {
+        showError('Passwords do not match');
+        return;
+    }
+
+    try {
+        const response = await axios.post(`${SERVER}/user/reset_password`, {
+            email,
+            new_password: newPassword,
+        });
+
+        if (response.status === 200) {
+            showMessage(response.data.message, 'success');
+            window.location.href = './signin.html';
+        } else {
+            showError('Failed to reset password');
+        }
+    } catch (error) {
+        console.error('Error during password reset:', error);
         const errorMessage =
-            error.response?.data?.message || 'Invalid email or password';
+            error.response?.data?.message || 'Failed to reset password';
         showError(errorMessage);
     }
 };
