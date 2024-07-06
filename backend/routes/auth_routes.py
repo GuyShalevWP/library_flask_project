@@ -34,7 +34,18 @@ def register():
     if not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
         return jsonify({'message': 'Password must contain at least one special character.'}), 400
 
-    new_user = User(email=email, first_name=first_name, last_name=last_name, phone=phone, role=role)
+    # Validate phone number
+    if not re.match(r'^\d+$', phone):
+        return jsonify({'message': 'Phone number must contain only digits.'}), 400
+
+    # Check if phone number has at least 9 digits
+    if len(phone) < 9:
+        return jsonify({'message': 'Phone number must be at least 9 digits long.'}), 400
+
+    # Format phone number with dashes after every 3 digits
+    formatted_phone = '-'.join([phone[i:i+3] for i in range(0, len(phone), 3)])
+
+    new_user = User(email=email, first_name=first_name, last_name=last_name, phone=formatted_phone, role=role)
     new_user.set_password(password)
     db.session.add(new_user)
     

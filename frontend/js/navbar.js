@@ -69,6 +69,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             if (token && role === 'admin') {
                 if (customersLink) customersLink.style.display = 'block';
+                if (borrowedBooksLink)
+                    borrowedBooksLink.style.display = 'block';
             }
         }
     };

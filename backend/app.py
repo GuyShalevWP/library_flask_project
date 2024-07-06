@@ -4,7 +4,8 @@ from flask_cors import CORS
 from flask_migrate import Migrate
 from config.config import Config
 from utils.ensure_upload_folder_exists import ensure_upload_folder_exists
-from utils.default_user import create_default_admin
+from utils.default_user import create_default_admin, create_default_users
+from utils.default_books import create_default_books
 from models import db  # Import the single instance of db
 
 
@@ -29,14 +30,19 @@ def create_app():
         from routes.user_routes import user_bp
         from routes.book_routes import book_bp
         from routes.borrow_routes import borrow_bp
+        from utils.default_books import def_book_bp
 
         app.register_blueprint(auth_bp)
         app.register_blueprint(user_bp)
         app.register_blueprint(book_bp)
         app.register_blueprint(borrow_bp)
+        app.register_blueprint(def_book_bp) # Route for creating default books
 
         db.create_all()
         create_default_admin()
+        create_default_users()
+        create_default_books() # Creates default books
+        
 
 
     return app
