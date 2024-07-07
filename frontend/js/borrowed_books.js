@@ -1,33 +1,35 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const SERVER = 'http://localhost:7000';
-    const token = localStorage.getItem('token');
-    const role = localStorage.getItem('role');
-    let currentBorrowId = null;
+const SERVER = 'http://localhost:7000';
+const token = localStorage.getItem('token');
+const role = localStorage.getItem('role');
+let currentBorrowId = null;
 
-    // Check if the token exists, if not redirect to sign-in
-    if (!token) {
-        window.location.href = '../signin_register/signin.html';
-        return;
+const showMessage = (msg, type) => {
+    const message = document.getElementById('message');
+    if (message) {
+        message.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
+    } else {
+        console.error('Message element not found');
     }
+};
 
-    const fetchBorrowedBooks = async () => {
-        try {
-            const endpoint =
-                role === 'admin' ? 'all_borrowed_books' : 'my_borrowed_books';
-            const response = await axios.get(`${SERVER}/${endpoint}`, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            const borrowedBooks = response.data;
-            renderBorrowedBooksTable(borrowedBooks);
-        } catch (error) {
-            console.error('Error fetching borrowed books:', error);
-        }
-    };
+const fetchBorrowedBooks = async () => {
+    try {
+        const endpoint =
+            role === 'admin' ? 'all_borrowed_books' : 'my_borrowed_books';
+        const response = await axios.get(`${SERVER}/${endpoint}`, {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+        const borrowedBooks = response.data;
+        renderBorrowedBooksTable(borrowedBooks);
+    } catch (error) {
+        console.error('Error fetching borrowed books:', error);
+    }
+};
 
-    const mapBorrowedBooksToTableRows = (books) => {
-        return books
-            .map(
-                (book, index) => `
+const mapBorrowedBooksToTableRows = (books) => {
+    return books
+        .map(
+            (book, index) => `
             <tr class="${book.late_return ? 'table-danger' : ''}">
                 <td>${index + 1}</td>
                 <td>${book.user_email}</td>
@@ -48,65 +50,62 @@ document.addEventListener('DOMContentLoaded', () => {
                     <button class="btn ${
                         book.is_returned ? 'btn-secondary' : 'btn-primary'
                     } btn-sm" ${
-                    book.is_returned ? 'disabled' : ''
-                } onclick="showConfirmReturnModal(${book.id})">
+                book.is_returned ? 'disabled' : ''
+            } onclick="showConfirmReturnModal(${book.id})">
                         ${book.is_returned ? 'Returned' : 'Return'}
                     </button>
                 </td>
             </tr>
         `
-            )
-            .join('');
-    };
+        )
+        .join('');
+};
 
-    const renderBorrowedBooksTable = (borrowedBooks) => {
-        const searchInput = document
-            .getElementById('searchInput')
-            .value.toLowerCase();
-        const searchCriteria = document.getElementById('searchCriteria').value;
-        const returnFilter = document.getElementById('returnFilter').value;
+const renderBorrowedBooksTable = (borrowedBooks) => {
+    const searchInput = document
+        .getElementById('searchInput')
+        .value.toLowerCase();
+    const searchCriteria = document.getElementById('searchCriteria').value;
+    const returnFilter = document.getElementById('returnFilter').value;
 
-        let filteredBooks = borrowedBooks
-            .filter((book) => {
-                let matchesSearch = true;
-                if (searchInput) {
-                    if (searchCriteria === 'all') {
-                        matchesSearch =
-                            book.user_email
-                                .toLowerCase()
-                                .includes(searchInput) ||
-                            `${book.first_name} ${book.last_name}`
-                                .toLowerCase()
-                                .includes(searchInput) ||
-                            book.book_name.toLowerCase().includes(searchInput);
-                    } else if (searchCriteria === 'email') {
-                        matchesSearch = book.user_email
+    let filteredBooks = borrowedBooks
+        .filter((book) => {
+            let matchesSearch = true;
+            if (searchInput) {
+                if (searchCriteria === 'all') {
+                    matchesSearch =
+                        book.user_email.toLowerCase().includes(searchInput) ||
+                        `${book.first_name} ${book.last_name}`
                             .toLowerCase()
-                            .includes(searchInput);
-                    } else if (searchCriteria === 'name') {
-                        matchesSearch = `${book.first_name} ${book.last_name}`
-                            .toLowerCase()
-                            .includes(searchInput);
-                    } else if (searchCriteria === 'book_name') {
-                        matchesSearch = book.book_name
-                            .toLowerCase()
-                            .includes(searchInput);
-                    }
+                            .includes(searchInput) ||
+                        book.book_name.toLowerCase().includes(searchInput);
+                } else if (searchCriteria === 'email') {
+                    matchesSearch = book.user_email
+                        .toLowerCase()
+                        .includes(searchInput);
+                } else if (searchCriteria === 'name') {
+                    matchesSearch = `${book.first_name} ${book.last_name}`
+                        .toLowerCase()
+                        .includes(searchInput);
+                } else if (searchCriteria === 'book_name') {
+                    matchesSearch = book.book_name
+                        .toLowerCase()
+                        .includes(searchInput);
                 }
+            }
 
-                const matchesFilter =
-                    returnFilter === '' ||
-                    (returnFilter === 'returned' && book.is_returned) ||
-                    (returnFilter === 'not_returned' && !book.is_returned) ||
-                    (returnFilter === 'late_return' && book.late_return);
+            const matchesFilter =
+                returnFilter === '' ||
+                (returnFilter === 'returned' && book.is_returned) ||
+                (returnFilter === 'not_returned' && !book.is_returned) ||
+                (returnFilter === 'late_return' && book.late_return);
 
-                return matchesSearch && matchesFilter;
-            })
-            .reverse();
+            return matchesSearch && matchesFilter;
+        })
+        .reverse();
 
-        // Map the sorted books to table rows and render the table
-        const tableRows = mapBorrowedBooksToTableRows(filteredBooks);
-        const table = `
+    const tableRows = mapBorrowedBooksToTableRows(filteredBooks);
+    const table = `
         <h3>Borrowed Books</h3>
         <table class="table table-bordered">
             <thead>
@@ -126,64 +125,66 @@ document.addEventListener('DOMContentLoaded', () => {
             </tbody>
         </table>
     `;
-        document.getElementById('borrowedBooksTable').innerHTML = table;
-    };
+    document.getElementById('borrowedBooksTable').innerHTML = table;
+};
 
-    window.showDetailsModal = (book) => {
-        document.getElementById('detailsBorrowId').innerText = book.id;
-        document.getElementById(
-            'detailsFullName'
-        ).innerText = `${book.first_name} ${book.last_name}`;
-        document.getElementById('detailsEmail').innerText = book.user_email;
-        document.getElementById('detailsBookId').innerText = book.book_id;
-        document.getElementById('detailsBookName').innerText = book.book_name;
-        document.getElementById('detailsAuthor').innerText = book.author;
-        document.getElementById('detailsBorrowDate').innerText =
-            book.borrow_date;
-        document.getElementById('detailsReturnDate').innerText =
-            book.return_date || book.estimated_return_date;
+const showDetailsModal = (book) => {
+    document.getElementById('detailsBorrowId').innerText = book.id;
+    document.getElementById(
+        'detailsFullName'
+    ).innerText = `${book.first_name} ${book.last_name}`;
+    document.getElementById('detailsEmail').innerText = book.user_email;
+    document.getElementById('detailsBookId').innerText = book.book_id;
+    document.getElementById('detailsBookName').innerText = book.book_name;
+    document.getElementById('detailsAuthor').innerText = book.author;
+    document.getElementById('detailsBorrowDate').innerText = book.borrow_date;
+    document.getElementById('detailsReturnDate').innerText =
+        book.return_date || book.estimated_return_date;
 
-        const detailsModal = new bootstrap.Modal(
-            document.getElementById('detailsModal')
-        );
-        detailsModal.show();
-    };
+    const detailsModal = new bootstrap.Modal(
+        document.getElementById('detailsModal')
+    );
+    detailsModal.show();
+};
 
-    window.showConfirmReturnModal = (borrowId) => {
-        currentBorrowId = borrowId;
-        const confirmReturnModal = new bootstrap.Modal(
-            document.getElementById('confirmReturnModal')
-        );
-        confirmReturnModal.show();
-    };
+const showConfirmReturnModal = (borrowId) => {
+    currentBorrowId = borrowId;
+    const confirmReturnModal = new bootstrap.Modal(
+        document.getElementById('confirmReturnModal')
+    );
+    confirmReturnModal.show();
+};
 
-    const confirmReturnBook = async () => {
-        if (currentBorrowId) {
-            try {
-                const response = await axios.put(
-                    `${SERVER}/return_book/${currentBorrowId}`,
-                    {},
-                    {
-                        headers: { Authorization: `Bearer ${token}` },
-                    }
-                );
-
-                if (response.status === 200) {
-                    const confirmReturnModal = bootstrap.Modal.getInstance(
-                        document.getElementById('confirmReturnModal')
-                    );
-                    confirmReturnModal.hide();
-                    alert('Book returned successfully');
-                    fetchBorrowedBooks(); // Refresh the table after returning the book
-                } else {
-                    alert('Failed to return book');
+const confirmReturnBook = async () => {
+    if (currentBorrowId) {
+        try {
+            const response = await axios.put(
+                `${SERVER}/return_book/${currentBorrowId}`,
+                {},
+                {
+                    headers: { Authorization: `Bearer ${token}` },
                 }
-            } catch (error) {
-                console.error('Error returning book:', error);
-                alert('Error returning book');
+            );
+
+            if (response.status === 200) {
+                const confirmReturnModal = bootstrap.Modal.getInstance(
+                    document.getElementById('confirmReturnModal')
+                );
+                confirmReturnModal.hide();
+                showMessage('Book returned successfully', 'success');
+                fetchBorrowedBooks();
+            } else {
+                showMessage('Failed to return book', 'danger');
             }
+        } catch (error) {
+            console.error('Error returning book:', error);
+            showMessage('Error returning book', 'danger');
         }
-    };
+    }
+};
+
+const initializePage = () => {
+    fetchBorrowedBooks();
 
     document
         .getElementById('searchInput')
@@ -194,6 +195,13 @@ document.addEventListener('DOMContentLoaded', () => {
     document
         .getElementById('returnFilter')
         .addEventListener('change', fetchBorrowedBooks);
+};
 
-    fetchBorrowedBooks();
+document.addEventListener('DOMContentLoaded', () => {
+    if (!token) {
+        window.location.href = '../signin_register/signin.html';
+        return;
+    }
+
+    initializePage();
 });

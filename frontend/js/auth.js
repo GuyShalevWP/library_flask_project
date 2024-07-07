@@ -2,16 +2,24 @@ const SERVER = 'http://localhost:7000';
 
 const showMessage = (msg, type) => {
     const message = document.getElementById('messageModalBody');
-    message.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
-    const messageModal = new bootstrap.Modal(
-        document.getElementById('messageModal')
-    );
-    messageModal.show();
+    if (message) {
+        message.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
+        const messageModal = new bootstrap.Modal(
+            document.getElementById('messageModal')
+        );
+        messageModal.show();
+    } else {
+        console.error('Message modal body element not found');
+    }
 };
 
 const showError = (msg) => {
     const errorContainer = document.getElementById('showErrorMassege');
-    errorContainer.innerHTML = `<div class="alert alert-danger">${msg}</div>`;
+    if (errorContainer) {
+        errorContainer.innerHTML = `<div class="alert alert-danger">${msg}</div>`;
+    } else {
+        console.error('Error message container element not found');
+    }
 };
 
 const login = async () => {
@@ -110,29 +118,32 @@ const register = async () => {
     const phone = document.getElementById('phone').value;
 
     if (password !== confirmPassword) {
-        showError(`Passwords do not match`);
+        showError('Passwords do not match');
         return;
     }
 
-    axios
-        .post(`${SERVER}/register`, {
-            email: email,
-            password: password,
+    try {
+        const response = await axios.post(`${SERVER}/register`, {
+            email,
+            password,
             first_name: firstName,
             last_name: lastName,
-            phone: phone,
-        })
-        .then((response) => {
-            const msg = response.data.message;
-
-            console.log(msg);
-            window.location.href = './signin.html';
-        })
-        .catch((error) => {
-            console.error('Error during registration:', error);
-            const errorMessage =
-                error.response?.data?.message ||
-                'Registration failed. Please try again.';
-            showError(errorMessage);
+            phone,
         });
+
+        if (response.status === 201) {
+            const msg = response.data.message;
+            console.log(msg);
+            showMessage(msg, 'success');
+            window.location.href = './signin.html';
+        } else {
+            showError('Registration failed. Please try again.');
+        }
+    } catch (error) {
+        console.error('Error during registration:', error);
+        const errorMessage =
+            error.response?.data?.message ||
+            'Registration failed. Please try again.';
+        showError(errorMessage);
+    }
 };

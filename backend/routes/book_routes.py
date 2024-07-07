@@ -6,6 +6,7 @@ from PIL import Image
 from models.books import Books
 from models.auth import User
 from models import db
+import re
 
 book_bp = Blueprint('books', __name__)
 
@@ -31,6 +32,9 @@ def add_book():
     
     if int(return_type) not in [1, 2, 3]:
         return jsonify({'message': 'Invalid return type.'}), 400
+    
+    if release_date is None or not re.match(r'^\d+$', release_date):
+        return jsonify({'message': 'Invalid release date. Enter year only'}), 400
 
     # Check if a book with the same name and author already exists
     existing_book = Books.query.filter_by(name=name, author=author).first()
@@ -121,6 +125,14 @@ def update_book(book_id):
     # Check if the return type is valid
     if int(return_type) not in [1, 2, 3]:
         return jsonify({'message': 'Invalid return type.'}), 400
+    
+    # Check if the book is borrowed and prevent changing return_type if it is
+    if book.is_borrowed and return_type != book.return_type:
+        return jsonify({'message': 'Cannot change return type while the book is borrowed.'}), 400
+    
+    # Check if release_date is provided and if it consists only of digits
+    if release_date is None or not re.match(r'^\d+$', release_date):
+        return jsonify({'message': 'Invalid release date. Enter year only'}), 400
 
     # Check if a book with the same name and author already exists
     existing_book = Books.query.filter_by(name=name, author=author).first()

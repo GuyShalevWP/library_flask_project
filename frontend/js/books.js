@@ -5,18 +5,14 @@ const role = localStorage.getItem('role');
 
 const message = document.getElementById('message');
 const booksList = document.getElementById('booksList');
-const updateBookForm = document.getElementById('updateBookForm');
-const confirmDeleteButton = document.getElementById('confirmDeleteButton');
 let currentBookId = null;
 let currentReturnType = null;
 let currentBookIsAvailable = null;
 
-// Get error message
 const showMessage = (msg, type) => {
     message.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
 };
 
-// Validate form
 const validateForm = (formData) => {
     for (const [key, value] of formData.entries()) {
         if (!value) return false;
@@ -31,7 +27,6 @@ const checkBorrowLength = (returnType) =>
         3: '2 days',
     }[returnType] || 'Unknown');
 
-// Fetch books from Flask endpoint
 const fetchBooks = async () => {
     try {
         const response = await axios.get(`${SERVER}/books`);
@@ -47,7 +42,6 @@ const fetchBooks = async () => {
     }
 };
 
-// Renders and printing the books
 const renderBooksTable = (books) => {
     const searchInput = document
         .getElementById('searchInput')
@@ -106,39 +100,36 @@ const renderBooksTable = (books) => {
                                 ${
                                     !role
                                         ? ``
-                                        : `<button class="btn btn-primary" 
-                                        style="display: ${
-                                            book.is_borrowed ? 'none' : ''
+                                        : `<button class="btn btn-primary 
+                                        ${
+                                            book.is_borrowed
+                                                ? 'btn-secondary disabled'
+                                                : 'btn-primary'
                                         }" 
-                                        onclick="showBorrowBook(
-                                        ${book.id}, 
-                                        '${book.name}', 
-                                        ${book.return_type}
-                                        )">Borrow
-                                    </button>`
+                                        onclick="showBorrowBook(${book.id}, 
+                                            '${book.name}', 
+                                            ${book.return_type})">
+                                        Borrow</button>`
                                 }
 
                                 ${
                                     role !== 'admin'
                                         ? ''
                                         : `<button class="btn btn-secondary" onclick="showEditModal(
-                                        ${book.id}, 
-                                        '${book.name}', 
-                                        '${book.author}', 
-                                        '${book.release_date}', 
-                                        ${book.return_type}, 
-                                        '${book.img}'
-                                        )">Edit
-                                    </button>
+                                            ${book.id},
+                                            '${book.name}', 
+                                            '${book.author}', 
+                                            '${book.release_date}', 
+                                            ${book.return_type}, 
+                                            '${book.img}')">
+                                        Edit</button>
                                     <button class="btn ${
                                         book.is_available
                                             ? 'btn-danger'
                                             : 'btn-success'
-                                    }" 
-                                    onclick="showDeleteModal(
+                                    }" onclick="showDeleteModal(
                                         ${book.id}, 
-                                        ${book.is_available}
-                                    )">
+                                        ${book.is_available})">
                                     ${book.is_available ? 'Delete' : 'Restore'}
                                     </button>`
                                 }
@@ -153,7 +144,6 @@ const renderBooksTable = (books) => {
         .join('');
 };
 
-// Add book
 const addBook = async () => {
     const formData = new FormData(document.getElementById('addBookForm'));
 
@@ -183,7 +173,6 @@ const addBook = async () => {
     }
 };
 
-// Show edit modal
 window.showEditModal = (id, name, author, releaseDate, returnType, img) => {
     currentBookId = id;
     document.getElementById('updateName').value = name;
@@ -191,10 +180,12 @@ window.showEditModal = (id, name, author, releaseDate, returnType, img) => {
     document.getElementById('updateReleaseDate').value = releaseDate;
     document.getElementById('updateBorrowLength').value = returnType;
     document.getElementById('updateImg').value = '';
-    $('#updateBookModal').modal('show');
+    const updateBookModal = new bootstrap.Modal(
+        document.getElementById('updateBookModal')
+    );
+    updateBookModal.show();
 };
 
-// Update book
 const updateBook = async () => {
     const formData = new FormData(document.getElementById('updateBookForm'));
 
@@ -218,7 +209,10 @@ const updateBook = async () => {
 
         if (response.status === 200) {
             showMessage('Book updated successfully', 'success');
-            $('#updateBookModal').modal('hide');
+            const updateBookModal = bootstrap.Modal.getInstance(
+                document.getElementById('updateBookModal')
+            );
+            updateBookModal.hide();
             fetchBooks();
         } else {
             showMessage('Failed to update book', 'danger');
@@ -231,7 +225,6 @@ const updateBook = async () => {
     }
 };
 
-// Show delete modal
 window.showDeleteModal = (id, isAvailable) => {
     currentBookId = id;
     currentBookIsAvailable = isAvailable;
@@ -245,10 +238,12 @@ window.showDeleteModal = (id, isAvailable) => {
     document.getElementById('confirmDeleteButton').innerText = isAvailable
         ? 'Delete'
         : 'Restore';
-    $('#deleteBookModal').modal('show');
+    const deleteBookModal = new bootstrap.Modal(
+        document.getElementById('deleteBookModal')
+    );
+    deleteBookModal.show();
 };
 
-// Delete or Restore book (update availability)
 const toggleBookAvailability = async () => {
     try {
         const response = await axios.put(
@@ -268,7 +263,10 @@ const toggleBookAvailability = async () => {
                 } successfully`,
                 'success'
             );
-            $('#deleteBookModal').modal('hide');
+            const deleteBookModal = bootstrap.Modal.getInstance(
+                document.getElementById('deleteBookModal')
+            );
+            deleteBookModal.hide();
             fetchBooks();
         } else {
             showMessage(
@@ -290,17 +288,18 @@ const toggleBookAvailability = async () => {
     }
 };
 
-// Show borrow modal
 window.showBorrowBook = (id, bookName, returnType) => {
     currentBookId = id;
     currentReturnType = returnType;
     document.getElementById('confirmBookName').innerText = bookName;
     document.getElementById('confirmBorrowLength').innerText =
         checkBorrowLength(returnType);
-    $('#confirmBorrowModal').modal('show');
+    const confirmBorrowModal = new bootstrap.Modal(
+        document.getElementById('confirmBorrowModal')
+    );
+    confirmBorrowModal.show();
 };
 
-// Borrow book
 const borrowBook = async () => {
     try {
         const response = await axios.post(
@@ -316,7 +315,10 @@ const borrowBook = async () => {
 
         if (response.status === 201) {
             showMessage('Book borrowed successfully', 'success');
-            $('#confirmBorrowModal').modal('hide');
+            const confirmBorrowModal = bootstrap.Modal.getInstance(
+                document.getElementById('confirmBorrowModal')
+            );
+            confirmBorrowModal.hide();
             fetchBooks();
         } else {
             showMessage('Failed to borrow book', 'danger');
@@ -330,7 +332,6 @@ const borrowBook = async () => {
     }
 };
 
-// Initialize page
 const initializePage = () => {
     fetchBooks();
 

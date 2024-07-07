@@ -43,12 +43,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             authLinks.innerHTML = `
-            <li class="nav-item">
-                <a class="nav-link" href="${profileHref}" id="profile">Profile</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#" id="logout">Logout</a>
-            </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="${profileHref}" id="profile">Profile</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" id="logout">Logout</a>
+                </li>
             `;
 
             document.getElementById('logout').addEventListener('click', () => {
@@ -63,14 +63,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
 
-            if (token && role === 'user') {
-                if (borrowedBooksLink)
+            if (role === 'user') {
+                if (borrowedBooksLink) {
                     borrowedBooksLink.style.display = 'block';
+                }
             }
-            if (token && role === 'admin') {
-                if (customersLink) customersLink.style.display = 'block';
-                if (borrowedBooksLink)
+            if (role === 'admin') {
+                if (customersLink) {
+                    customersLink.style.display = 'block';
+                }
+                if (borrowedBooksLink) {
                     borrowedBooksLink.style.display = 'block';
+                }
             }
         }
     };

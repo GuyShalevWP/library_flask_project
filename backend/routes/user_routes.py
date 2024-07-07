@@ -111,7 +111,7 @@ def get_or_update_profile():
 
 
 # Endpoint get user details and edit it
-@user_bp.route('/user/<int:user_id>', methods=['GET', 'PUT'])
+@user_bp.route('/user/<int:user_id>/details', methods=['GET', 'PUT'])
 @jwt_required()
 def get_or_update_user(user_id):
     current_user_id = get_jwt_identity()
