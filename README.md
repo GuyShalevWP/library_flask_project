@@ -61,12 +61,17 @@ pip install -r requirements.txt
 python app.py
 ```
 
+_If there's no data in library.db, in app.py there're Default setups_
+
 ## Usage
 
 ### Authentication
 
 -   **Register**: `POST /register`
 -   **Login**: `POST /login`
+-   **Change password**: `PUT /user/change_password`
+-   **Request reset password**: `POST /user/request_reset_password`
+-   **Reset password**: `PUT /user/reset_password`
 
 ### User Management
 

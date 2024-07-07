@@ -35,7 +35,7 @@ def create_app():
         app.register_blueprint(book_bp)
         app.register_blueprint(borrow_bp)
 
-        # Default set up - in case of deleted db use this:
+        # Default setup - in case of deleted db use this:
         # from utils.default_user import create_default_admin, create_default_users
         # from utils.default_books import create_default_books
         # create_default_admin()

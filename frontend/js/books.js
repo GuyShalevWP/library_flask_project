@@ -46,24 +46,51 @@ const renderBooksTable = (books) => {
     const searchInput = document
         .getElementById('searchInput')
         .value.toLowerCase();
-    const searchCriteria = document.getElementById('searchCriteria').value;
+    const searchBookBy = document.getElementById('searchBookBy').value;
+    const availabilityFilter =
+        document.getElementById('availabilityFilter').value;
+    const borrowLengthFilter =
+        document.getElementById('borrowLengthFilter').value;
 
-    const filteredBooks = books.filter((book) => {
-        let matchesSearch = true;
-        if (searchInput) {
-            if (searchCriteria === 'all') {
-                matchesSearch =
-                    book.name.toLowerCase().includes(searchInput) ||
-                    book.author.toLowerCase().includes(searchInput);
-            } else if (searchCriteria === 'book_name') {
-                matchesSearch = book.name.toLowerCase().includes(searchInput);
-            } else if (searchCriteria === 'author') {
-                matchesSearch = book.author.toLowerCase().includes(searchInput);
+    const filteredBooks = books
+        .filter((book) => {
+            let matchesSearch = true;
+            if (searchInput) {
+                if (searchBookBy === 'all') {
+                    matchesSearch =
+                        book.name.toLowerCase().includes(searchInput) ||
+                        book.author.toLowerCase().includes(searchInput);
+                } else if (searchBookBy === 'book_name') {
+                    matchesSearch = book.name
+                        .toLowerCase()
+                        .includes(searchInput);
+                } else if (searchBookBy === 'author') {
+                    matchesSearch = book.author
+                        .toLowerCase()
+                        .includes(searchInput);
+                }
             }
-        }
 
-        return matchesSearch;
-    });
+            const matchesAvailabilityFilter =
+                availabilityFilter === '' ||
+                (availabilityFilter === 'available_books' &&
+                    !book.is_borrowed) ||
+                (availabilityFilter === 'borrowed_books' && book.is_borrowed);
+
+            const matchesBorrowLengthFilter =
+                borrowLengthFilter === '' ||
+                (borrowLengthFilter === 'ten_days' && book.return_type === 1) ||
+                (borrowLengthFilter === 'five_days' &&
+                    book.return_type === 2) ||
+                (borrowLengthFilter === 'two_days' && book.return_type === 3);
+
+            return (
+                matchesSearch &&
+                matchesAvailabilityFilter &&
+                matchesBorrowLengthFilter
+            );
+        })
+        .reverse();
 
     booksList.innerHTML = filteredBooks
         .map(
@@ -339,7 +366,13 @@ const initializePage = () => {
         .getElementById('searchInput')
         .addEventListener('input', fetchBooks);
     document
-        .getElementById('searchCriteria')
+        .getElementById('searchBookBy')
+        .addEventListener('change', fetchBooks);
+    document
+        .getElementById('availabilityFilter')
+        .addEventListener('change', fetchBooks);
+    document
+        .getElementById('borrowLengthFilter')
         .addEventListener('change', fetchBooks);
 };
 

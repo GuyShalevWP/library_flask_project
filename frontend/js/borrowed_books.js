@@ -97,6 +97,9 @@ const renderBorrowedBooksTable = (borrowedBooks) => {
             const matchesFilter =
                 returnFilter === '' ||
                 (returnFilter === 'returned' && book.is_returned) ||
+                (returnFilter === 'returned_late' &&
+                    book.is_returned &&
+                    book.late_return) ||
                 (returnFilter === 'not_returned' && !book.is_returned) ||
                 (returnFilter === 'late_return' && book.late_return);
 

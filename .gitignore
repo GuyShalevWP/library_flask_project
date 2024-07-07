@@ -1,4 +1,8 @@
 # Ignore pycaches
 __pycache__
-# images
-instance/
+images
+!images/1984George_Orwell.jpg
+!images/Harry_Potter_and_the_Philosophers_StoneJ.K._Rowling.jpg
+!images/Moby_DickHerman_Melville.jpeg
+!images/Pride_and_PrejudiceJane_Austen.jpeg
+!images/To_Kill_a_MockingbirdHarper_Lee.jpg
