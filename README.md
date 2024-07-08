@@ -61,7 +61,7 @@ pip install -r requirements.txt
 python app.py
 ```
 
-_If there's no data in library.db, in app.py there're Default setups_
+_If there's no data in library.db, in app.py there're Default setups (run the app first)_
 
 ## Usage
 

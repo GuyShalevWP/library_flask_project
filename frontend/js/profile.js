@@ -2,6 +2,8 @@ const SERVER = 'http://localhost:7000';
 const token = localStorage.getItem('token');
 let currentBorrowId = null;
 let currentProfileId = null;
+let updateProfileModalInstance;
+let deactivateConfirmationModalInstance;
 
 const showMessage = (msg, type) => {
     const message = document.getElementById('messageModalBody');
@@ -90,8 +92,6 @@ const showChangePasswordModal = () => {
     changePasswordModal.show();
 };
 
-let updateProfileModalInstance;
-let deactivateConfirmationModalInstance;
 
 const showEditProfileModal = (profile) => {
     currentProfileId = profile.id;

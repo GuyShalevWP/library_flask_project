@@ -92,7 +92,7 @@ const renderBooksTable = (books) => {
         })
         .reverse();
 
-    booksList.innerHTML = filteredBooks
+        booksList.innerHTML = filteredBooks
         .map(
             (book) => `
         ${
@@ -134,7 +134,7 @@ const renderBooksTable = (books) => {
                                                 : 'btn-primary'
                                         }" 
                                         onclick="showBorrowBook(${book.id}, 
-                                            '${book.name}', 
+                                            \`${book.name}\`, 
                                             ${book.return_type})">
                                         Borrow</button>`
                                 }
@@ -144,11 +144,11 @@ const renderBooksTable = (books) => {
                                         ? ''
                                         : `<button class="btn btn-secondary" onclick="showEditModal(
                                             ${book.id},
-                                            '${book.name}', 
-                                            '${book.author}', 
-                                            '${book.release_date}', 
+                                            \`${book.name}\`, 
+                                            \`${book.author}\`, 
+                                            \`${book.release_date}\`, 
                                             ${book.return_type}, 
-                                            '${book.img}')">
+                                            \`${book.img}\`)">
                                         Edit</button>
                                     <button class="btn ${
                                         book.is_available
@@ -200,17 +200,27 @@ const addBook = async () => {
     }
 };
 
-window.showEditModal = (id, name, author, releaseDate, returnType, img) => {
+const showEditModal = (id, name, author, releaseDate, returnType, img) => {
     currentBookId = id;
-    document.getElementById('updateName').value = name;
-    document.getElementById('updateAuthor').value = author;
-    document.getElementById('updateReleaseDate').value = releaseDate;
-    document.getElementById('updateBorrowLength').value = returnType;
-    document.getElementById('updateImg').value = '';
-    const updateBookModal = new bootstrap.Modal(
-        document.getElementById('updateBookModal')
-    );
-    updateBookModal.show();
+
+    const updateNameElement = document.getElementById('updateName');
+    const updateAuthorElement = document.getElementById('updateAuthor');
+    const updateReleaseDateElement = document.getElementById('updateReleaseDate');
+    const updateBorrowLengthElement = document.getElementById('updateBorrowLength');
+    const updateImgElement = document.getElementById('updateImg');
+
+    if (updateNameElement && updateAuthorElement && updateReleaseDateElement && updateBorrowLengthElement && updateImgElement) {
+        updateNameElement.value = name;
+        updateAuthorElement.value = author;
+        updateReleaseDateElement.value = releaseDate;
+        updateBorrowLengthElement.value = returnType;
+        updateImgElement.value = '';
+
+        const updateBookModal = new bootstrap.Modal(document.getElementById('updateBookModal'));
+        updateBookModal.show();
+    } else {
+        console.error('One or more elements not found in the DOM');
+    }
 };
 
 const updateBook = async () => {
@@ -315,17 +325,18 @@ const toggleBookAvailability = async () => {
     }
 };
 
-window.showBorrowBook = (id, bookName, returnType) => {
+const showBorrowBook = (id, bookName, returnType) => {
     currentBookId = id;
     currentReturnType = returnType;
     document.getElementById('confirmBookName').innerText = bookName;
-    document.getElementById('confirmBorrowLength').innerText =
-        checkBorrowLength(returnType);
+    document.getElementById('confirmBorrowLength').innerText = checkBorrowLength(returnType);
     const confirmBorrowModal = new bootstrap.Modal(
         document.getElementById('confirmBorrowModal')
     );
     confirmBorrowModal.show();
 };
+
+
 
 const borrowBook = async () => {
     try {
@@ -374,6 +385,7 @@ const initializePage = () => {
     document
         .getElementById('borrowLengthFilter')
         .addEventListener('change', fetchBooks);
+
 };
 
 document.addEventListener('DOMContentLoaded', () => {

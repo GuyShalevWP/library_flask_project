@@ -12,35 +12,35 @@ def create_default_books():
         {
             "name": "To Kill a Mockingbird",
             "author": "Harper Lee",
-            "release_date": "11-07-1960",
+            "release_date": "1960",
             "img": "To_Kill_a_MockingbirdHarper_Lee.jpg",
             "return_type": 1
         },
         {
             "name": "1984",
             "author": "George Orwell",
-            "release_date": "08-06-1949",
+            "release_date": "1949",
             "img": "1984George_Orwell.jpg",
             "return_type": 3
         },
         {
             "name": "Pride and Prejudice",
             "author": "Jane Austen",
-            "release_date": "28-01-1813",
+            "release_date": "1813",
             "img": "Pride_and_PrejudiceJane_Austen.jpeg",
             "return_type": 2
         },
         {
             "name": "Harry Potter and the Philosopher's Stone",
             "author": "J.K. Rowling",
-            "release_date": "26-06-1997",
+            "release_date": "1997",
             "img": "Harry_Potter_and_the_Philosophers_StoneJ.K._Rowling.jpg",
             "return_type": 1
         },
         {
             "name": "Moby Dick",
             "author": "Herman Melville",
-            "release_date": "18-10-1851",
+            "release_date": "1851",
             "img": "Moby_DickHerman_Melville.jpeg",
             "return_type": 1
         }
